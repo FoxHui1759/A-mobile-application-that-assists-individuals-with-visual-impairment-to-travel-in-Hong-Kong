@@ -1,2 +1,3 @@
-
-Backend/google-map-api/.env
+backend/venv
+.idea
+.vscode

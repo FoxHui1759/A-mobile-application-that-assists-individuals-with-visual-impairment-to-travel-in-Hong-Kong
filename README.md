@@ -22,7 +22,7 @@ cd backend; python -m venv venv
 ```
 3. open a new command line tab, activate virtual environment
 ```
-source env/bin/activate # For Linux/macOS
+source venv/bin/activate # For Linux/macOS
 venv\Scripts\activate  # For Windows
 ```
 4. install dependencies for Flask 
