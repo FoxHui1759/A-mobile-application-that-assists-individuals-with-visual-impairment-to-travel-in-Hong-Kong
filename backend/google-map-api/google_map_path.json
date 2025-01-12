@@ -1,0 +1,403 @@
+{
+    "geocoded_waypoints": [
+        {
+            "geocoder_status": "OK",
+            "place_id": "ChIJU7KrHIX_AzQR6RCSAZ5h91M",
+            "types": [
+                "premise"
+            ]
+        },
+        {
+            "geocoder_status": "OK",
+            "partial_match": true,
+            "place_id": "ChIJB3Ix9ob_AzQRM7yNLs0whKQ",
+            "types": [
+                "establishment",
+                "point_of_interest"
+            ]
+        }
+    ],
+    "routes": [
+        {
+            "bounds": {
+                "northeast": {
+                    "lat": 22.2835441,
+                    "lng": 114.1401112
+                },
+                "southwest": {
+                    "lat": 22.2822613,
+                    "lng": 114.1341404
+                }
+            },
+            "copyrights": "Map data ©2025 Google",
+            "legs": [
+                {
+                    "distance": {
+                        "text": "0.8 公里",
+                        "value": 782
+                    },
+                    "duration": {
+                        "text": "11 分",
+                        "value": 652
+                    },
+                    "end_address": "香港半山薄扶林道",
+                    "end_location": {
+                        "lat": 22.2831229,
+                        "lng": 114.1401112
+                    },
+                    "start_address": "香港龍虎山逸夫教學樓",
+                    "start_location": {
+                        "lat": 22.2835343,
+                        "lng": 114.1343987
+                    },
+                    "steps": [
+                        {
+                            "distance": {
+                                "text": "24 米",
+                                "value": 24
+                            },
+                            "duration": {
+                                "text": "1 分鐘",
+                                "value": 33
+                            },
+                            "end_location": {
+                                "lat": 22.2835441,
+                                "lng": 114.1341662
+                            },
+                            "html_instructions": "往<b>西</b>",
+                            "polyline": {
+                                "points": "ag_gC_{rwTAB?h@"
+                            },
+                            "start_location": {
+                                "lat": 22.2835343,
+                                "lng": 114.1343987
+                            },
+                            "travel_mode": "WALKING"
+                        },
+                        {
+                            "distance": {
+                                "text": "54 米",
+                                "value": 54
+                            },
+                            "duration": {
+                                "text": "1 分鐘",
+                                "value": 50
+                            },
+                            "end_location": {
+                                "lat": 22.2830219,
+                                "lng": 114.1341404
+                            },
+                            "html_instructions": "向<b>左</b>轉，朝<b>大學道</b>前進",
+                            "maneuver": "turn-left",
+                            "polyline": {
+                                "points": "cg_gCqyrwTh@@J@V?J?L@"
+                            },
+                            "start_location": {
+                                "lat": 22.2835441,
+                                "lng": 114.1341662
+                            },
+                            "travel_mode": "WALKING"
+                        },
+                        {
+                            "distance": {
+                                "text": "0.3 公里",
+                                "value": 322
+                            },
+                            "duration": {
+                                "text": "4 分",
+                                "value": 268
+                            },
+                            "end_location": {
+                                "lat": 22.2822999,
+                                "lng": 114.137008
+                            },
+                            "html_instructions": "向<b>左</b>轉入<b>大學道</b>",
+                            "maneuver": "turn-left",
+                            "polyline": {
+                                "points": "{c_gCkyrwT@M@i@@Q?K@E?G@OBM?M@GBKFUDMD[?M@U?m@?G@W@UBS@QBW@M@IF]DWHWDKDKHMFCRAHA"
+                            },
+                            "start_location": {
+                                "lat": 22.2830219,
+                                "lng": 114.1341404
+                            },
+                            "travel_mode": "WALKING"
+                        },
+                        {
+                            "distance": {
+                                "text": "0.4 公里",
+                                "value": 382
+                            },
+                            "duration": {
+                                "text": "5 分",
+                                "value": 301
+                            },
+                            "end_location": {
+                                "lat": 22.2831229,
+                                "lng": 114.1401112
+                            },
+                            "html_instructions": "<b>左</b>轉<div style=\"font-size:0.9em\">目的地將在左邊</div>",
+                            "maneuver": "turn-left",
+                            "polyline": {
+                                "points": "k__gCikswTAM@gB@mA?OB_CBKAIAOCOEGEGACOIOCkAMCAECIEIIOUEGAK?G?CB[?m@@E?CBQ"
+                            },
+                            "start_location": {
+                                "lat": 22.2822999,
+                                "lng": 114.137008
+                            },
+                            "travel_mode": "WALKING"
+                        }
+                    ],
+                    "traffic_speed_entry": [],
+                    "via_waypoint": []
+                }
+            ],
+            "overview_polyline": {
+                "points": "ag_gC_{rwTAl@t@Bb@?L@@MB{@@QDs@Rw@Di@@cAFiAHaALu@Nc@NYZEHAAMBuDBoC@UE_@KOQM{AQ]UU]ASB_@@s@BU"
+            },
+            "summary": "大學道",
+            "warnings": [
+                "步行路線指示目前為測試版。 使用注意事項–此路線可能沒有行人道或步行徑。"
+            ],
+            "waypoint_order": []
+        },
+        {
+            "bounds": {
+                "northeast": {
+                    "lat": 22.283554,
+                    "lng": 114.1401112
+                },
+                "southwest": {
+                    "lat": 22.2822558,
+                    "lng": 114.1343987
+                }
+            },
+            "copyrights": "Map data ©2025 Google",
+            "legs": [
+                {
+                    "distance": {
+                        "text": "0.8 公里",
+                        "value": 806
+                    },
+                    "duration": {
+                        "text": "12 分",
+                        "value": 713
+                    },
+                    "end_address": "香港半山薄扶林道",
+                    "end_location": {
+                        "lat": 22.2831229,
+                        "lng": 114.1401112
+                    },
+                    "start_address": "香港龍虎山逸夫教學樓",
+                    "start_location": {
+                        "lat": 22.2835343,
+                        "lng": 114.1343987
+                    },
+                    "steps": [
+                        {
+                            "distance": {
+                                "text": "43 米",
+                                "value": 43
+                            },
+                            "duration": {
+                                "text": "1 分鐘",
+                                "value": 42
+                            },
+                            "end_location": {
+                                "lat": 22.2835313,
+                                "lng": 114.1348144
+                            },
+                            "html_instructions": "往<b>東</b>",
+                            "polyline": {
+                                "points": "ag_gC_{rwT?s@@QAG?C"
+                            },
+                            "start_location": {
+                                "lat": 22.2835343,
+                                "lng": 114.1343987
+                            },
+                            "travel_mode": "WALKING"
+                        },
+                        {
+                            "distance": {
+                                "text": "49 米",
+                                "value": 49
+                            },
+                            "duration": {
+                                "text": "1 分鐘",
+                                "value": 43
+                            },
+                            "end_location": {
+                                "lat": 22.2832946,
+                                "lng": 114.1349353
+                            },
+                            "html_instructions": "稍向<b>左</b>轉",
+                            "maneuver": "turn-slight-left",
+                            "polyline": {
+                                "points": "ag_gCq}rwTAG?C?C?CAA?AAC?A?A?A@A?A@?B?B?@@B@DBB?D@@?B@@?B@FA"
+                            },
+                            "start_location": {
+                                "lat": 22.2835313,
+                                "lng": 114.1348144
+                            },
+                            "travel_mode": "WALKING"
+                        },
+                        {
+                            "distance": {
+                                "text": "0.2 公里",
+                                "value": 191
+                            },
+                            "duration": {
+                                "text": "2 分",
+                                "value": 143
+                            },
+                            "end_location": {
+                                "lat": 22.2831477,
+                                "lng": 114.1367491
+                            },
+                            "html_instructions": "<b>左</b>轉",
+                            "maneuver": "turn-left",
+                            "polyline": {
+                                "points": "qe_gCk~rwT?MBC@A@C@G?I?M?K@K?M?G?a@@KAIAGAE?AAKBOBMFI@I?I@U?M@s@?["
+                            },
+                            "start_location": {
+                                "lat": 22.2832946,
+                                "lng": 114.1349353
+                            },
+                            "travel_mode": "WALKING"
+                        },
+                        {
+                            "distance": {
+                                "text": "28 米",
+                                "value": 28
+                            },
+                            "duration": {
+                                "text": "1 分鐘",
+                                "value": 23
+                            },
+                            "end_location": {
+                                "lat": 22.2828974,
+                                "lng": 114.1367768
+                            },
+                            "html_instructions": "向<b>右</b>轉",
+                            "maneuver": "turn-right",
+                            "polyline": {
+                                "points": "ud_gCuiswTLAPAPA"
+                            },
+                            "start_location": {
+                                "lat": 22.2831477,
+                                "lng": 114.1367491
+                            },
+                            "travel_mode": "WALKING"
+                        },
+                        {
+                            "distance": {
+                                "text": "77 米",
+                                "value": 77
+                            },
+                            "duration": {
+                                "text": "2 分",
+                                "value": 109
+                            },
+                            "end_location": {
+                                "lat": 22.2827837,
+                                "lng": 114.1374687
+                            },
+                            "html_instructions": "稍向<b>左</b>轉",
+                            "maneuver": "turn-slight-left",
+                            "polyline": {
+                                "points": "cc_gC{iswTH?DG@C?e@?C?Y@U@Y@I"
+                            },
+                            "start_location": {
+                                "lat": 22.2828974,
+                                "lng": 114.1367768
+                            },
+                            "travel_mode": "WALKING"
+                        },
+                        {
+                            "distance": {
+                                "text": "45 米",
+                                "value": 45
+                            },
+                            "duration": {
+                                "text": "1 分鐘",
+                                "value": 44
+                            },
+                            "end_location": {
+                                "lat": 22.2826584,
+                                "lng": 114.1378042
+                            },
+                            "html_instructions": "向<b>右</b>轉",
+                            "maneuver": "turn-right",
+                            "polyline": {
+                                "points": "kb_gCenswTJ?BAB??A@A?C@E?K?K@QAG"
+                            },
+                            "start_location": {
+                                "lat": 22.2827837,
+                                "lng": 114.1374687
+                            },
+                            "travel_mode": "WALKING"
+                        },
+                        {
+                            "distance": {
+                                "text": "49 米",
+                                "value": 49
+                            },
+                            "duration": {
+                                "text": "1 分鐘",
+                                "value": 60
+                            },
+                            "end_location": {
+                                "lat": 22.2823685,
+                                "lng": 114.1376088
+                            },
+                            "html_instructions": "向<b>右</b>轉",
+                            "maneuver": "turn-right",
+                            "polyline": {
+                                "points": "sa_gCgpswTFAF?F@@?B@@F@D?DBFBDB@D?D?"
+                            },
+                            "start_location": {
+                                "lat": 22.2826584,
+                                "lng": 114.1378042
+                            },
+                            "travel_mode": "WALKING"
+                        },
+                        {
+                            "distance": {
+                                "text": "0.3 公里",
+                                "value": 324
+                            },
+                            "duration": {
+                                "text": "4 分",
+                                "value": 249
+                            },
+                            "end_location": {
+                                "lat": 22.2831229,
+                                "lng": 114.1401112
+                            },
+                            "html_instructions": "<b>左</b>轉<div style=\"font-size:0.9em\">目的地將在左邊</div>",
+                            "maneuver": "turn-left",
+                            "polyline": {
+                                "points": "y__gCaoswT?kA?OBcCBIL??GAOCOEGEGACOIOCkAMCAECIEIIOUEGAK?G?CB[?m@@E?CBQ"
+                            },
+                            "start_location": {
+                                "lat": 22.2823685,
+                                "lng": 114.1376088
+                            },
+                            "travel_mode": "WALKING"
+                        }
+                    ],
+                    "traffic_speed_entry": [],
+                    "via_waypoint": []
+                }
+            ],
+            "overview_polyline": {
+                "points": "ag_gC_{rwT?qAASAOHANFLBJ?BQBE@Q@s@@u@EY@[JWBw@@oA^CZAFK?cABo@@IJ?FA@C@a@?YNAH@DH@JFLH@D??kABsCBIL?AWIWGK_@MoAOOIY_@GS?KB[?m@@IBQ"
+            },
+            "summary": "",
+            "warnings": [
+                "步行路線指示目前為測試版。 使用注意事項–此路線可能沒有行人道或步行徑。"
+            ],
+            "waypoint_order": []
+        }
+    ],
+    "status": "OK"
+}
