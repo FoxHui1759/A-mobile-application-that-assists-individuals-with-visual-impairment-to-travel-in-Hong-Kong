@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'pages/camera_page.dart';
-import 'pages/microphone_page.dart';
 import 'pages/settings_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -18,7 +17,6 @@ class _HomePageState extends State<HomePage> {
 
   static final List<Widget> _widgetOptions = <Widget>[
     CameraPage(),
-    MicrophonePage(),
     SettingsPage(),
   ];
 
@@ -31,60 +29,40 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(100),
-          child: Column(
-            children: [
-              AppBar(
-                centerTitle: true,
-                backgroundColor: Theme.of(context).primaryColor,
-                title: Text(
-                  "Going to: The Unisersity of Hong Kong",
+        appBar: AppBar(
+          centerTitle: true,
+          backgroundColor: Theme.of(context).primaryColor,
+          title: Text(
+            widget.title,
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                ),
+                child: Text(
+                  'Eyes on the Road',
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
               ),
-              Container(
-                color: Theme.of(context).primaryColor,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Text(
-                      'Keep Forward',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    Text(
-                      '50 mins',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
-                ),
-              )
             ],
-          )),
-      body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Theme.of(context).primaryColor,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.camera, color: Colors.white),
-            label: 'Camera',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.mic, color: Colors.white),
-            label: 'Microphone',
+        ),
+        body: Center(
+          child: _widgetOptions.elementAt(_selectedIndex),
+        ),
+        bottomNavigationBar: BottomAppBar(
+          height: 30,
+          color: Theme.of(context).primaryColor,
+          child: SizedBox(
+            height: 0,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings, color: Colors.white),
-            label: 'Settings',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber,
-        unselectedItemColor: Colors.white,
-        onTap: _onItemTapped,
-      ),
-    );
+        ));
   }
 }

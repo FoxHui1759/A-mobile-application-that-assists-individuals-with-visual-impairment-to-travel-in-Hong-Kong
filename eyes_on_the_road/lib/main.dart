@@ -15,21 +15,31 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'appTitle',
+      title: appTitle,
       theme: ThemeData(
         useMaterial3: true,
-        primaryColor: Colors.black,
-        scaffoldBackgroundColor: const Color.fromARGB(255, 26, 26, 26),
+        primaryColor: Colors.indigo[900],
+        colorScheme:
+            ColorScheme.fromSwatch().copyWith(secondary: Colors.indigo[700]),
+        scaffoldBackgroundColor: Colors.white,
         textTheme: TextTheme(
-          headlineMedium: GoogleFonts.oswald(
-              fontSize: 25, fontStyle: FontStyle.normal, color: Colors.white),
-          bodyMedium: GoogleFonts.oswald(
+          headlineMedium: GoogleFonts.carlito(
+              fontSize: 25,
+              fontStyle: FontStyle.normal,
+              color: Colors.white,
+              fontWeight: FontWeight.bold),
+          bodyLarge: GoogleFonts.carlito(
+              fontSize: 50,
+              fontStyle: FontStyle.normal,
+              color: Colors.white,
+              fontWeight: FontWeight.bold),
+          bodyMedium: GoogleFonts.carlito(
               fontSize: 20, fontStyle: FontStyle.normal, color: Colors.white),
-          labelMedium: GoogleFonts.oswald(
+          labelMedium: GoogleFonts.carlito(
               fontSize: 10, fontStyle: FontStyle.normal, color: Colors.white),
         ),
       ),
-      home: HomePage(title: 'Flutter Demo Home Page'),
+      home: HomePage(title: appTitle),
     );
   }
 }
