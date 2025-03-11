@@ -78,7 +78,7 @@ def preprocess_coordinates(location: str, api_key: str) -> str:
             'latlng': f"{coords[0]},{coords[1]}",
             'key': api_key,
             'region': 'hk',
-            'language': 'en'
+            'language': 'zh-TW'
         }
         response = requests.get(geocode_url, params=params)
         result = response.json()
@@ -280,7 +280,7 @@ def google_map_path(origin: str, destination: str, api_key: str):
         'mode': 'walking',
         'departure_time': 'now',
         'alternatives': 'true',
-        'language': 'en',
+        'language': 'zh-HK',
         'key': api_key
     }
 
@@ -326,7 +326,7 @@ def google_map_path(origin: str, destination: str, api_key: str):
         with open('google_map_path.json', 'w', encoding='utf-8') as f:
             json.dump(output_data, f, indent=4, ensure_ascii=False)
 
-        print(f"== Best Route from {origin} to {destination} ==")
+        print(f"================== Best Route from {origin} to {destination} ==================")
         for i, step in enumerate(steps):
             dist = step.get('distance', {}).get('text', 'N/A')
             dur = step.get('duration', {}).get('text', 'N/A')
@@ -338,7 +338,9 @@ def google_map_path(origin: str, destination: str, api_key: str):
             instructions = instructions_raw.replace("<b>", "**").replace("</b>", "**")
             instructions = instructions.replace("<div style=\"font-size:0.9em\">", ", ").replace("</div>", "")
 
-            print(f"Step {i + 1}: {instructions}, Distance: {dist}, Duration: {dur}")
+            print(f"Step {i + 1}: {instructions}")
+            print(f"Distance: {dist}")
+            print(f"Duration: {dur}")
             print(f"Start location: {start_loc}")
             print(f"End location: {end_loc}")
             print("------------")

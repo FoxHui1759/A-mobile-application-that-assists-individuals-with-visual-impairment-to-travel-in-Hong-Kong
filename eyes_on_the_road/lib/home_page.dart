@@ -1,4 +1,3 @@
-// home_page.dart
 import 'package:flutter/material.dart';
 
 import 'pages/camera_page.dart';
