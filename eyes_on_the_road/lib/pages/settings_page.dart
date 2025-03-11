@@ -1,3 +1,4 @@
+// lib/pages/settings_page.dart
 import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
@@ -33,13 +34,13 @@ class _SettingsPageState extends State<SettingsPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Text(
+          const Text(
             'Settings Page',
             style: TextStyle(fontSize: 20),
           ),
           Text(
             message,
-            style: TextStyle(fontSize: 20),
+            style: const TextStyle(fontSize: 20),
           )
         ],
       ),
