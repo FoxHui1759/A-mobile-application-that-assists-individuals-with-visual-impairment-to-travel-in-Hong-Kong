@@ -1,0 +1,550 @@
+{
+    "selected_route": {
+        "bounds": {
+            "northeast": {
+                "lat": 22.2835441,
+                "lng": 114.1376598
+            },
+            "southwest": {
+                "lat": 22.2820131,
+                "lng": 114.1341404
+            }
+        },
+        "copyrights": "Map data ©2025 Google",
+        "legs": [
+            {
+                "distance": {
+                    "text": "0.5 km",
+                    "value": 497
+                },
+                "duration": {
+                    "text": "8 mins",
+                    "value": 463
+                },
+                "end_address": "Hong Kong, Lung Fu Shan, Graduate House, The Jockey Club Building,No. 3 University Drive, HKU.",
+                "end_location": {
+                    "lat": 22.2820131,
+                    "lng": 114.1376598
+                },
+                "start_address": "Run Run Shaw Tower, Lung Fu Shan, Hong Kong",
+                "start_location": {
+                    "lat": 22.2835343,
+                    "lng": 114.1343987
+                },
+                "steps": [
+                    {
+                        "distance": {
+                            "text": "24 m",
+                            "value": 24
+                        },
+                        "duration": {
+                            "text": "1 min",
+                            "value": 33
+                        },
+                        "end_location": {
+                            "lat": 22.2835441,
+                            "lng": 114.1341662
+                        },
+                        "html_instructions": "Head <b>west</b>",
+                        "polyline": {
+                            "points": "ag_gC_{rwTAB?h@"
+                        },
+                        "start_location": {
+                            "lat": 22.2835343,
+                            "lng": 114.1343987
+                        },
+                        "travel_mode": "WALKING"
+                    },
+                    {
+                        "distance": {
+                            "text": "54 m",
+                            "value": 54
+                        },
+                        "duration": {
+                            "text": "1 min",
+                            "value": 50
+                        },
+                        "end_location": {
+                            "lat": 22.2830219,
+                            "lng": 114.1341404
+                        },
+                        "html_instructions": "Turn <b>left</b> toward <b>University Dr</b>",
+                        "maneuver": "turn-left",
+                        "polyline": {
+                            "points": "cg_gCqyrwTh@@J@V?J?L@"
+                        },
+                        "start_location": {
+                            "lat": 22.2835441,
+                            "lng": 114.1341662
+                        },
+                        "travel_mode": "WALKING"
+                    },
+                    {
+                        "distance": {
+                            "text": "0.3 km",
+                            "value": 322
+                        },
+                        "duration": {
+                            "text": "4 mins",
+                            "value": 268
+                        },
+                        "end_location": {
+                            "lat": 22.2822999,
+                            "lng": 114.137008
+                        },
+                        "html_instructions": "Turn <b>left</b> onto <b>University Dr</b>",
+                        "maneuver": "turn-left",
+                        "polyline": {
+                            "points": "{c_gCkyrwT@M@i@@Q?K@E?G@OBM?M@GBKFUDMD[?M@U?m@?G@W@UBS@QBW@M@IF]DWHWDKDKHMFCRAHA"
+                        },
+                        "start_location": {
+                            "lat": 22.2830219,
+                            "lng": 114.1341404
+                        },
+                        "travel_mode": "WALKING"
+                    },
+                    {
+                        "distance": {
+                            "text": "58 m",
+                            "value": 58
+                        },
+                        "duration": {
+                            "text": "1 min",
+                            "value": 54
+                        },
+                        "end_location": {
+                            "lat": 22.2822976,
+                            "lng": 114.1375705
+                        },
+                        "html_instructions": "Turn <b>left</b>",
+                        "maneuver": "turn-left",
+                        "polyline": {
+                            "points": "k__gCikswTAM@aB"
+                        },
+                        "start_location": {
+                            "lat": 22.2822999,
+                            "lng": 114.137008
+                        },
+                        "travel_mode": "WALKING"
+                    },
+                    {
+                        "distance": {
+                            "text": "39 m",
+                            "value": 39
+                        },
+                        "duration": {
+                            "text": "1 min",
+                            "value": 58
+                        },
+                        "end_location": {
+                            "lat": 22.2820131,
+                            "lng": 114.1376598
+                        },
+                        "html_instructions": "Turn <b>right</b><div style=\"font-size:0.9em\">Destination will be on the right</div>",
+                        "maneuver": "turn-right",
+                        "polyline": {
+                            "points": "k__gCynswTD@@AB?@ABADCDCLCB?HA"
+                        },
+                        "start_location": {
+                            "lat": 22.2822976,
+                            "lng": 114.1375705
+                        },
+                        "travel_mode": "WALKING"
+                    }
+                ],
+                "traffic_speed_entry": [],
+                "via_waypoint": []
+            }
+        ],
+        "overview_polyline": {
+            "points": "ag_gC_{rwTAl@t@Bb@?L@@MB{@@QDs@Rw@Di@@cAFiAHaALu@Nc@NYZEHAAM@aBD@DADC\\KHA"
+        },
+        "summary": "University Dr",
+        "warnings": [
+            "Walking directions are in beta. Use caution – This route may be missing sidewalks or pedestrian paths."
+        ],
+        "waypoint_order": []
+    },
+    "all_routes": [
+        {
+            "bounds": {
+                "northeast": {
+                    "lat": 22.2835441,
+                    "lng": 114.1376598
+                },
+                "southwest": {
+                    "lat": 22.2820131,
+                    "lng": 114.1341404
+                }
+            },
+            "copyrights": "Map data ©2025 Google",
+            "legs": [
+                {
+                    "distance": {
+                        "text": "0.5 km",
+                        "value": 497
+                    },
+                    "duration": {
+                        "text": "8 mins",
+                        "value": 463
+                    },
+                    "end_address": "Hong Kong, Lung Fu Shan, Graduate House, The Jockey Club Building,No. 3 University Drive, HKU.",
+                    "end_location": {
+                        "lat": 22.2820131,
+                        "lng": 114.1376598
+                    },
+                    "start_address": "Run Run Shaw Tower, Lung Fu Shan, Hong Kong",
+                    "start_location": {
+                        "lat": 22.2835343,
+                        "lng": 114.1343987
+                    },
+                    "steps": [
+                        {
+                            "distance": {
+                                "text": "24 m",
+                                "value": 24
+                            },
+                            "duration": {
+                                "text": "1 min",
+                                "value": 33
+                            },
+                            "end_location": {
+                                "lat": 22.2835441,
+                                "lng": 114.1341662
+                            },
+                            "html_instructions": "Head <b>west</b>",
+                            "polyline": {
+                                "points": "ag_gC_{rwTAB?h@"
+                            },
+                            "start_location": {
+                                "lat": 22.2835343,
+                                "lng": 114.1343987
+                            },
+                            "travel_mode": "WALKING"
+                        },
+                        {
+                            "distance": {
+                                "text": "54 m",
+                                "value": 54
+                            },
+                            "duration": {
+                                "text": "1 min",
+                                "value": 50
+                            },
+                            "end_location": {
+                                "lat": 22.2830219,
+                                "lng": 114.1341404
+                            },
+                            "html_instructions": "Turn <b>left</b> toward <b>University Dr</b>",
+                            "maneuver": "turn-left",
+                            "polyline": {
+                                "points": "cg_gCqyrwTh@@J@V?J?L@"
+                            },
+                            "start_location": {
+                                "lat": 22.2835441,
+                                "lng": 114.1341662
+                            },
+                            "travel_mode": "WALKING"
+                        },
+                        {
+                            "distance": {
+                                "text": "0.3 km",
+                                "value": 322
+                            },
+                            "duration": {
+                                "text": "4 mins",
+                                "value": 268
+                            },
+                            "end_location": {
+                                "lat": 22.2822999,
+                                "lng": 114.137008
+                            },
+                            "html_instructions": "Turn <b>left</b> onto <b>University Dr</b>",
+                            "maneuver": "turn-left",
+                            "polyline": {
+                                "points": "{c_gCkyrwT@M@i@@Q?K@E?G@OBM?M@GBKFUDMD[?M@U?m@?G@W@UBS@QBW@M@IF]DWHWDKDKHMFCRAHA"
+                            },
+                            "start_location": {
+                                "lat": 22.2830219,
+                                "lng": 114.1341404
+                            },
+                            "travel_mode": "WALKING"
+                        },
+                        {
+                            "distance": {
+                                "text": "58 m",
+                                "value": 58
+                            },
+                            "duration": {
+                                "text": "1 min",
+                                "value": 54
+                            },
+                            "end_location": {
+                                "lat": 22.2822976,
+                                "lng": 114.1375705
+                            },
+                            "html_instructions": "Turn <b>left</b>",
+                            "maneuver": "turn-left",
+                            "polyline": {
+                                "points": "k__gCikswTAM@aB"
+                            },
+                            "start_location": {
+                                "lat": 22.2822999,
+                                "lng": 114.137008
+                            },
+                            "travel_mode": "WALKING"
+                        },
+                        {
+                            "distance": {
+                                "text": "39 m",
+                                "value": 39
+                            },
+                            "duration": {
+                                "text": "1 min",
+                                "value": 58
+                            },
+                            "end_location": {
+                                "lat": 22.2820131,
+                                "lng": 114.1376598
+                            },
+                            "html_instructions": "Turn <b>right</b><div style=\"font-size:0.9em\">Destination will be on the right</div>",
+                            "maneuver": "turn-right",
+                            "polyline": {
+                                "points": "k__gCynswTD@@AB?@ABADCDCLCB?HA"
+                            },
+                            "start_location": {
+                                "lat": 22.2822976,
+                                "lng": 114.1375705
+                            },
+                            "travel_mode": "WALKING"
+                        }
+                    ],
+                    "traffic_speed_entry": [],
+                    "via_waypoint": []
+                }
+            ],
+            "overview_polyline": {
+                "points": "ag_gC_{rwTAl@t@Bb@?L@@MB{@@QDs@Rw@Di@@cAFiAHaALu@Nc@NYZEHAAM@aBD@DADC\\KHA"
+            },
+            "summary": "University Dr",
+            "warnings": [
+                "Walking directions are in beta. Use caution – This route may be missing sidewalks or pedestrian paths."
+            ],
+            "waypoint_order": []
+        },
+        {
+            "bounds": {
+                "northeast": {
+                    "lat": 22.283554,
+                    "lng": 114.1378121
+                },
+                "southwest": {
+                    "lat": 22.2820131,
+                    "lng": 114.1343987
+                }
+            },
+            "copyrights": "Map data ©2025 Google",
+            "legs": [
+                {
+                    "distance": {
+                        "text": "0.5 km",
+                        "value": 521
+                    },
+                    "duration": {
+                        "text": "9 mins",
+                        "value": 524
+                    },
+                    "end_address": "Hong Kong, Lung Fu Shan, Graduate House, The Jockey Club Building,No. 3 University Drive, HKU.",
+                    "end_location": {
+                        "lat": 22.2820131,
+                        "lng": 114.1376598
+                    },
+                    "start_address": "Run Run Shaw Tower, Lung Fu Shan, Hong Kong",
+                    "start_location": {
+                        "lat": 22.2835343,
+                        "lng": 114.1343987
+                    },
+                    "steps": [
+                        {
+                            "distance": {
+                                "text": "43 m",
+                                "value": 43
+                            },
+                            "duration": {
+                                "text": "1 min",
+                                "value": 42
+                            },
+                            "end_location": {
+                                "lat": 22.2835313,
+                                "lng": 114.1348144
+                            },
+                            "html_instructions": "Head <b>east</b>",
+                            "polyline": {
+                                "points": "ag_gC_{rwT?s@@QAG?C"
+                            },
+                            "start_location": {
+                                "lat": 22.2835343,
+                                "lng": 114.1343987
+                            },
+                            "travel_mode": "WALKING"
+                        },
+                        {
+                            "distance": {
+                                "text": "49 m",
+                                "value": 49
+                            },
+                            "duration": {
+                                "text": "1 min",
+                                "value": 43
+                            },
+                            "end_location": {
+                                "lat": 22.2832946,
+                                "lng": 114.1349353
+                            },
+                            "html_instructions": "Slight <b>left</b>",
+                            "maneuver": "turn-slight-left",
+                            "polyline": {
+                                "points": "ag_gCq}rwTAG?C?C?CAA?AAC?A?A?A@A?A@?B?B?@@B@DBB?D@@?B@@?B@FA"
+                            },
+                            "start_location": {
+                                "lat": 22.2835313,
+                                "lng": 114.1348144
+                            },
+                            "travel_mode": "WALKING"
+                        },
+                        {
+                            "distance": {
+                                "text": "0.2 km",
+                                "value": 191
+                            },
+                            "duration": {
+                                "text": "2 mins",
+                                "value": 143
+                            },
+                            "end_location": {
+                                "lat": 22.2831477,
+                                "lng": 114.1367491
+                            },
+                            "html_instructions": "Turn <b>left</b>",
+                            "maneuver": "turn-left",
+                            "polyline": {
+                                "points": "qe_gCk~rwT?MBC@A@C@G?I?M?K@K?M?G?a@@KAIAGAE?AAKBOBMFI@I?I@U?M@s@?["
+                            },
+                            "start_location": {
+                                "lat": 22.2832946,
+                                "lng": 114.1349353
+                            },
+                            "travel_mode": "WALKING"
+                        },
+                        {
+                            "distance": {
+                                "text": "28 m",
+                                "value": 28
+                            },
+                            "duration": {
+                                "text": "1 min",
+                                "value": 23
+                            },
+                            "end_location": {
+                                "lat": 22.2828974,
+                                "lng": 114.1367768
+                            },
+                            "html_instructions": "Turn <b>right</b>",
+                            "maneuver": "turn-right",
+                            "polyline": {
+                                "points": "ud_gCuiswTLAPAPA"
+                            },
+                            "start_location": {
+                                "lat": 22.2831477,
+                                "lng": 114.1367491
+                            },
+                            "travel_mode": "WALKING"
+                        },
+                        {
+                            "distance": {
+                                "text": "77 m",
+                                "value": 77
+                            },
+                            "duration": {
+                                "text": "2 mins",
+                                "value": 109
+                            },
+                            "end_location": {
+                                "lat": 22.2827837,
+                                "lng": 114.1374687
+                            },
+                            "html_instructions": "Slight <b>left</b>",
+                            "maneuver": "turn-slight-left",
+                            "polyline": {
+                                "points": "cc_gC{iswTH?DG@C?e@?C?Y@U@Y@I"
+                            },
+                            "start_location": {
+                                "lat": 22.2828974,
+                                "lng": 114.1367768
+                            },
+                            "travel_mode": "WALKING"
+                        },
+                        {
+                            "distance": {
+                                "text": "45 m",
+                                "value": 45
+                            },
+                            "duration": {
+                                "text": "1 min",
+                                "value": 44
+                            },
+                            "end_location": {
+                                "lat": 22.2826584,
+                                "lng": 114.1378042
+                            },
+                            "html_instructions": "Turn <b>right</b>",
+                            "maneuver": "turn-right",
+                            "polyline": {
+                                "points": "kb_gCenswTJ?BAB??A@A?C@E?K?K@QAG"
+                            },
+                            "start_location": {
+                                "lat": 22.2827837,
+                                "lng": 114.1374687
+                            },
+                            "travel_mode": "WALKING"
+                        },
+                        {
+                            "distance": {
+                                "text": "88 m",
+                                "value": 88
+                            },
+                            "duration": {
+                                "text": "2 mins",
+                                "value": 120
+                            },
+                            "end_location": {
+                                "lat": 22.2820131,
+                                "lng": 114.1376598
+                            },
+                            "html_instructions": "Turn <b>right</b><div style=\"font-size:0.9em\">Destination will be on the right</div>",
+                            "maneuver": "turn-right",
+                            "polyline": {
+                                "points": "sa_gCgpswTFAF?F@@?B@@F@D?DBFBDB@D?D?NFB@@AB?@ABADCDCLCB?HA"
+                            },
+                            "start_location": {
+                                "lat": 22.2826584,
+                                "lng": 114.1378042
+                            },
+                            "travel_mode": "WALKING"
+                        }
+                    ],
+                    "traffic_speed_entry": [],
+                    "via_waypoint": []
+                }
+            ],
+            "overview_polyline": {
+                "points": "ag_gC_{rwT?qAASAOHANFLBJ?BQBE@Q@s@@u@EY@[JWBw@@oA^CZAFK?cABo@@IJ?FA@C@a@?YNAH@DH@JFL^HJA\\MLA"
+            },
+            "summary": "",
+            "warnings": [
+                "Walking directions are in beta. Use caution – This route may be missing sidewalks or pedestrian paths."
+            ],
+            "waypoint_order": []
+        }
+    ]
+}
