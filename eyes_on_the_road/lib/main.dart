@@ -6,6 +6,7 @@ import 'home_page.dart';
 const String appTitle = 'Eyes on the Road';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 

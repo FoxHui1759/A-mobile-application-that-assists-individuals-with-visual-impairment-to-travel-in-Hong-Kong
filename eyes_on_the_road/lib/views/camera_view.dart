@@ -1,18 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
 
-class CameraPage extends StatefulWidget {
-  const CameraPage({super.key});
+class CameraView extends StatefulWidget {
+  const CameraView({super.key, required this.camera});
 
+  final CameraDescription camera;
   @override
-  _CameraPageState createState() => _CameraPageState();
+  _CameraViewState createState() => _CameraViewState();
 }
 
-class _CameraPageState extends State<CameraPage> {
+class _CameraViewState extends State<CameraView> {
   String nivagationCue = 'go forward';
   String distance = '100m';
   String destination = 'The University of Hong Kong';
 
   bool _inputting = false;
+
+  late CameraController _controller;
+  late Future<void> _initializeControllerFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = CameraController(widget.camera, ResolutionPreset.medium);
+    _initializeControllerFuture = _controller.initialize();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   void _showMicrophone() {
     setState(() {
@@ -37,11 +55,21 @@ class _CameraPageState extends State<CameraPage> {
       },
       child: Stack(
         children: <Widget>[
-          Image(
+          /* Image(
               fit: BoxFit.cover,
               width: View.of(context).physicalSize.width,
               height: View.of(context).physicalSize.height,
-              image: AssetImage('assets/images/street.jpg')),
+              image: AssetImage('assets/images/street.jpg')), */
+          FutureBuilder<void>(
+            future: _initializeControllerFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                return CameraPreview(_controller);
+              } else {
+                return const Center(child: CircularProgressIndicator());
+              }
+            },
+          ),
           Container(
             alignment: Alignment.center,
             child: Column(
