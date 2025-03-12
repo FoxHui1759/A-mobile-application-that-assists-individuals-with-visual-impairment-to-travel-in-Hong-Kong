@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         primaryColor: Colors.black,
         colorScheme:
-            ColorScheme.fromSwatch().copyWith(secondary: Colors.black87),
+            ColorScheme.fromSwatch().copyWith(secondary: Colors.black45),
         scaffoldBackgroundColor: Colors.white,
         textTheme: TextTheme(
           headlineMedium: GoogleFonts.carlito(
