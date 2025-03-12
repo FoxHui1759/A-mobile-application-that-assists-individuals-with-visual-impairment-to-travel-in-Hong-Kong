@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class CameraView extends StatefulWidget {
-  const CameraView({super.key, required this.camera});
+  const CameraView({super.key, required this.camera, required this.socket});
 
   final CameraDescription camera;
+  final IO.Socket socket;
   @override
   _CameraViewState createState() => _CameraViewState();
 }
@@ -14,6 +16,8 @@ class _CameraViewState extends State<CameraView> {
   String distance = '100m';
   String destination = 'The University of Hong Kong';
 
+  String message = '';
+
   bool _inputting = false;
 
   late CameraController _controller;
@@ -21,9 +25,14 @@ class _CameraViewState extends State<CameraView> {
 
   @override
   void initState() {
-    super.initState();
+    //initialize the camera controller
     _controller = CameraController(widget.camera, ResolutionPreset.medium);
     _initializeControllerFuture = _controller.initialize();
+    widget.socket.emit('message', message);
+    _controller.startImageStream((image) {
+      widget.socket.emit('message', message);
+    });
+    super.initState();
   }
 
   @override

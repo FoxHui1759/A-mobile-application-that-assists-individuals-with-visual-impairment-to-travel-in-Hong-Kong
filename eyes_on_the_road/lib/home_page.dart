@@ -1,5 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'views/camera_view.dart';
 
 class HomePage extends StatefulWidget {
@@ -14,10 +15,43 @@ class _HomePageState extends State<HomePage> {
   List<CameraDescription>? cameras;
   CameraDescription? firstCamera;
 
+  String message = '';
+
+  final IO.Socket socket = IO.io('http://10.0.2.2:5000', <String, dynamic>{
+    'transports': ['websocket'],
+    'autoConnect': false,
+  });
+
   @override
   void initState() {
-    super.initState();
+    _initializeSocket();
     _initializeCamera();
+
+    super.initState();
+  }
+
+  void _initializeSocket() {
+    socket.connect();
+    socket.onConnect((_) {
+      setState(() {
+        message = 'Connected';
+      });
+    });
+    socket.onDisconnect((_) {
+      setState(() {
+        message = 'Disconnected';
+      });
+    });
+    socket.onConnectError((data) {
+      setState(() {
+        message = 'Error: $data';
+      });
+    });
+    socket.onError((data) {
+      setState(() {
+        message = 'Error: $data';
+      });
+    });
   }
 
   void _initializeCamera() async {
@@ -49,7 +83,7 @@ class _HomePageState extends State<HomePage> {
                   color: Theme.of(context).primaryColor,
                 ),
                 child: Text(
-                  'Eyes on the Road',
+                  message,
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
               ),
@@ -57,7 +91,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         body: Center(
-          child: CameraView(camera: firstCamera!),
+          child: CameraView(camera: firstCamera!, socket: socket),
         ),
         bottomNavigationBar: BottomAppBar(
           color: Theme.of(context).primaryColor,
