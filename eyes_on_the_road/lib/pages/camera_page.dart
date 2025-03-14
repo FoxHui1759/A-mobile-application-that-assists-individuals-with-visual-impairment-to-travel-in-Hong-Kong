@@ -1,7 +1,9 @@
-// lib/pages/camera_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/navigation_service.dart';
+import '../services/location_service.dart';
+import '../utils/connectivity_checker.dart';
+import '../widgets/error_banner.dart';
 
 class CameraPage extends StatefulWidget {
   const CameraPage({super.key});
@@ -33,22 +35,63 @@ class _CameraPageState extends State<CameraPage> {
     });
   }
 
-  void _startNavigation(BuildContext context) {
+  void _startNavigation(BuildContext context) async {
     if (_destination.isNotEmpty) {
-      Provider.of<NavigationService>(context, listen: false)
-          .startNavigation(_destination);
+      // Check connectivity first
+      final connectivityChecker = ConnectivityChecker();
+      final isConnected = await connectivityChecker.isConnected();
 
-      setState(() {
-        _showDestinationInput = false;
-        _destination = '';
-      });
+      if (!isConnected) {
+        if (context.mounted) {
+          await connectivityChecker.showNoInternetDialog(context);
+        }
+        return;
+      }
+
+      try {
+        Provider.of<NavigationService>(context, listen: false)
+            .startNavigation(_destination);
+
+        setState(() {
+          _showDestinationInput = false;
+          _destination = '';
+        });
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error starting navigation: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
     }
+  }
+
+  void _recalculateRoute(BuildContext context) async {
+    // Check connectivity first
+    final connectivityChecker = ConnectivityChecker();
+    final isConnected = await connectivityChecker.isConnected();
+
+    if (!isConnected) {
+      if (context.mounted) {
+        await connectivityChecker.showNoInternetDialog(context);
+      }
+      return;
+    }
+
+    Provider.of<NavigationService>(context, listen: false).recalculateRoute();
+  }
+
+  void _toggleAutoAdvance(BuildContext context) {
+    Provider.of<NavigationService>(context, listen: false).toggleAutoAdvance();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<NavigationService>(
-      builder: (context, navigationService, child) {
+    return Consumer2<NavigationService, LocationService>(
+      builder: (context, navigationService, locationService, child) {
         return GestureDetector(
           onLongPressStart: (details) {
             _showMicrophone();
@@ -78,7 +121,9 @@ class _CameraPageState extends State<CameraPage> {
                       width: double.infinity,
                       height: 100,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.secondary,
+                        color: navigationService.isOffRoute
+                            ? Colors.red[800]
+                            : Theme.of(context).colorScheme.secondary,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Center(
@@ -89,6 +134,25 @@ class _CameraPageState extends State<CameraPage> {
                         ),
                       ),
                     ),
+
+                    // Current position (only shown when navigating)
+                    if (navigationService.isNavigating && locationService.hasLocation)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Container(
+                          padding: const EdgeInsets.all(10.0),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor.withOpacity(0.8),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            'Your position: ${locationService.currentPosition!.latitude.toStringAsFixed(5)}, '
+                                '${locationService.currentPosition!.longitude.toStringAsFixed(5)}',
+                            style: const TextStyle(color: Colors.white, fontSize: 12),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
 
                     // Distance and navigation controls (bottom)
                     Container(
@@ -114,37 +178,82 @@ class _CameraPageState extends State<CameraPage> {
                           if (navigationService.isNavigating)
                             Padding(
                               padding: const EdgeInsets.only(top: 10.0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              child: Column(
                                 children: [
-                                  // Previous step
-                                  ElevatedButton(
-                                    onPressed: navigationService.previousStep,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Theme.of(context).primaryColor,
-                                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                    ),
-                                    child: const Icon(Icons.arrow_back, color: Colors.white),
+                                  // Main navigation buttons
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      // Previous step
+                                      ElevatedButton(
+                                        onPressed: navigationService.previousStep,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Theme.of(context).primaryColor,
+                                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                        ),
+                                        child: const Icon(Icons.arrow_back, color: Colors.white),
+                                      ),
+
+                                      // End navigation
+                                      ElevatedButton(
+                                        onPressed: navigationService.endNavigation,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.red[700],
+                                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                        ),
+                                        child: const Icon(Icons.cancel, color: Colors.white),
+                                      ),
+
+                                      // Next step
+                                      ElevatedButton(
+                                        onPressed: navigationService.nextStep,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Theme.of(context).primaryColor,
+                                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                        ),
+                                        child: const Icon(Icons.arrow_forward, color: Colors.white),
+                                      ),
+                                    ],
                                   ),
 
-                                  // End navigation
-                                  ElevatedButton(
-                                    onPressed: navigationService.endNavigation,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.red[700],
-                                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                    ),
-                                    child: const Icon(Icons.cancel, color: Colors.white),
-                                  ),
+                                  // Additional navigation controls
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 10.0),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        // Auto-advance toggle
+                                        ElevatedButton.icon(
+                                          onPressed: () => _toggleAutoAdvance(context),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: navigationService.autoAdvance
+                                                ? Colors.green[700]
+                                                : Colors.grey[700],
+                                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                          ),
+                                          icon: const Icon(Icons.directions_walk, color: Colors.white, size: 18),
+                                          label: Text(
+                                            navigationService.autoAdvance ? 'Auto On' : 'Auto Off',
+                                            style: const TextStyle(color: Colors.white, fontSize: 12),
+                                          ),
+                                        ),
 
-                                  // Next step
-                                  ElevatedButton(
-                                    onPressed: navigationService.nextStep,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Theme.of(context).primaryColor,
-                                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                        // Recalculate route button (only shown when off-route)
+                                        if (navigationService.isOffRoute)
+                                          ElevatedButton.icon(
+                                            onPressed: () => _recalculateRoute(context),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.orange[700],
+                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                            ),
+                                            icon: const Icon(Icons.refresh, color: Colors.white, size: 18),
+                                            label: const Text(
+                                              'Recalculate',
+                                              style: TextStyle(color: Colors.white, fontSize: 12),
+                                            ),
+                                          ),
+                                      ],
                                     ),
-                                    child: const Icon(Icons.arrow_forward, color: Colors.white),
                                   ),
                                 ],
                               ),
@@ -152,19 +261,82 @@ class _CameraPageState extends State<CameraPage> {
 
                           // Set destination button
                           if (!navigationService.isNavigating && !_showDestinationInput)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 10.0),
-                              child: ElevatedButton(
-                                onPressed: _toggleDestinationInput,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Theme.of(context).primaryColor,
-                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                            Column(
+                              children: [
+                                // Current location status
+                                if (locationService.hasLocation)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 10.0, bottom: 5.0),
+                                    child: Text(
+                                      'Ready to navigate',
+                                      style: TextStyle(
+                                        color: Colors.green[700],
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  )
+                                else if (locationService.errorMessage.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 10.0, bottom: 5.0),
+                                    child: Text(
+                                      'Location error: ${locationService.errorMessage}',
+                                      style: TextStyle(
+                                        color: Colors.red[700],
+                                        fontSize: 12,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  )
+                                else
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 10.0, bottom: 5.0),
+                                    child: Text(
+                                      'Getting your location...',
+                                      style: TextStyle(
+                                        color: Colors.orange[700],
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
+                                  ),
+
+                                // Set destination button
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 10.0),
+                                  child: ElevatedButton(
+                                    onPressed: _toggleDestinationInput,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Theme.of(context).primaryColor,
+                                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                                    ),
+                                    child: const Text(
+                                      'Set Destination',
+                                      style: TextStyle(color: Colors.white, fontSize: 18),
+                                    ),
+                                  ),
                                 ),
-                                child: const Text(
-                                  'Set Destination',
-                                  style: TextStyle(color: Colors.white, fontSize: 18),
-                                ),
-                              ),
+
+                                // Initialize location button (if not initialized)
+                                if (!locationService.isInitialized)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 10.0),
+                                    child: ElevatedButton(
+                                      onPressed: () async {
+                                        await locationService.initialize();
+                                        if (locationService.isInitialized) {
+                                          await locationService.getCurrentPosition();
+                                        }
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.green[700],
+                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                      ),
+                                      child: const Text(
+                                        'Enable Location',
+                                        style: TextStyle(color: Colors.white, fontSize: 14),
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
                         ],
                       ),
@@ -295,17 +467,41 @@ class _CameraPageState extends State<CameraPage> {
                   top: 120,
                   left: 0,
                   right: 0,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 20),
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.red[700],
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      navigationService.error,
-                      style: const TextStyle(color: Colors.white, fontSize: 16),
-                      textAlign: TextAlign.center,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: navigationService.error.toLowerCase().contains('api key') ||
+                        navigationService.error.toLowerCase().contains('maps.googleapis.com')
+                        ? ApiKeyErrorBanner(
+                      onRetry: () {
+                        if (navigationService.isNavigating) {
+                          _recalculateRoute(context);
+                        } else if (_destination.isNotEmpty) {
+                          _startNavigation(context);
+                        }
+                      },
+                    )
+                        : navigationService.error.toLowerCase().contains('internet') ||
+                        navigationService.error.toLowerCase().contains('network') ||
+                        navigationService.error.toLowerCase().contains('connection')
+                        ? NetworkErrorBanner(
+                      onRetry: () async {
+                        final connectivityChecker = ConnectivityChecker();
+                        final isConnected = await connectivityChecker.isConnected();
+
+                        if (!isConnected && context.mounted) {
+                          await connectivityChecker.showNoInternetDialog(context);
+                        } else if (navigationService.isNavigating) {
+                          _recalculateRoute(context);
+                        } else if (_destination.isNotEmpty) {
+                          _startNavigation(context);
+                        }
+                      },
+                    )
+                        : ErrorBanner(
+                      errorMessage: navigationService.error,
+                      onRetry: navigationService.isNavigating
+                          ? () => _recalculateRoute(context)
+                          : null,
                     ),
                   ),
                 ),
