@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/sst_service.dart';
 
 class CameraPage extends StatefulWidget {
   const CameraPage({super.key});
@@ -8,21 +9,29 @@ class CameraPage extends StatefulWidget {
 }
 
 class _CameraPageState extends State<CameraPage> {
-  String nivagationCue = 'go forward';
+  final SpeechService _speechService = SpeechService();
+  String navigationCue = 'go forward';
   String distance = '100m';
   String destination = 'The University of Hong Kong';
-
   bool _inputting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _speechService.initialize();
+  }
 
   void _showMicrophone() {
     setState(() {
       _inputting = true;
+      _speechService.startListening();
     });
   }
 
   void _hideMicrophone() {
     setState(() {
       _inputting = false;
+      _speechService.stopListening();
     });
   }
 
@@ -56,7 +65,7 @@ class _CameraPageState extends State<CameraPage> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Center(
-                    child: Text(nivagationCue,
+                    child: Text(navigationCue,
                         style: Theme.of(context).textTheme.bodyLarge),
                   ),
                 ),
