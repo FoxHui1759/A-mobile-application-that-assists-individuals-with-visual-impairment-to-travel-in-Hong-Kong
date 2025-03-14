@@ -17,7 +17,7 @@ class _HomePageState extends State<HomePage> {
 
   String message = '';
 
-  final IO.Socket socket = IO.io('http://10.0.2.2:5000', <String, dynamic>{
+  final IO.Socket socket = IO.io('http://192.168.1.101:9999', <String, dynamic>{
     'transports': ['websocket'],
     'autoConnect': false,
   });
