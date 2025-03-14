@@ -1,5 +1,6 @@
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
+import base64
 
 
 app = Flask(__name__)
@@ -15,6 +16,14 @@ def handle_connect():
 @socketio.on("message")
 def handle_message(data):
     print(f"Received message: {data}")
+
+
+@socketio.on("image")
+def handle_image(data):
+    print(f"Received image: {data}")
+    image = base64.b64decode(data)
+    with open("test.png", "wb") as f:
+        f.write(image)
 
 
 if __name__ == "__main__":

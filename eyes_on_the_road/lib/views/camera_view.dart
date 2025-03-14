@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:image/image.dart' as imglib;
 
 class CameraView extends StatefulWidget {
   const CameraView({super.key, required this.camera, required this.socket});
@@ -25,14 +28,81 @@ class _CameraViewState extends State<CameraView> {
 
   @override
   void initState() {
-    //initialize the camera controller
-    _controller = CameraController(widget.camera, ResolutionPreset.medium);
-    _initializeControllerFuture = _controller.initialize();
-    widget.socket.emit('message', message);
-    _controller.startImageStream((image) {
-      widget.socket.emit('message', message);
-    });
     super.initState();
+    //initialize the camera controller
+    _controller = CameraController(
+      widget.camera,
+      ResolutionPreset.high,
+      imageFormatGroup: ImageFormatGroup.yuv420,
+      enableAudio: false,
+    );
+    _initializeControllerFuture = _controller.initialize().then((_) async {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        message = 'start streaming';
+      });
+      widget.socket.emit("message", message);
+      await _controller.startImageStream((CameraImage cameraImage) {
+        //send the image to the server");
+        if (widget.socket.connected) {
+          imglib.Image image = convertYUV420ToImage(cameraImage);
+          String base64Image = base64Encode(imglib.encodeJpg(image));
+
+          widget.socket.emit("image", base64Image);
+        }
+      });
+    });
+  }
+
+  imglib.Image convertYUV420ToImage(CameraImage cameraImage) {
+    final imageWidth = cameraImage.width;
+    final imageHeight = cameraImage.height;
+
+    final yBuffer = cameraImage.planes[0].bytes;
+    final uBuffer = cameraImage.planes[1].bytes;
+    final vBuffer = cameraImage.planes[2].bytes;
+
+    final int yRowStride = cameraImage.planes[0].bytesPerRow;
+    final int yPixelStride = cameraImage.planes[0].bytesPerPixel!;
+
+    final int uvRowStride = cameraImage.planes[1].bytesPerRow;
+    final int uvPixelStride = cameraImage.planes[1].bytesPerPixel!;
+
+    // Create the image with swapped width and height to account for rotation
+    final image = imglib.Image(width: imageHeight, height: imageWidth);
+
+    for (int h = 0; h < imageHeight; h++) {
+      int uvh = (h / 2).floor();
+
+      for (int w = 0; w < imageWidth; w++) {
+        int uvw = (w / 2).floor();
+
+        final yIndex = (h * yRowStride) + (w * yPixelStride);
+
+        final int y = yBuffer[yIndex];
+
+        final int uvIndex = (uvh * uvRowStride) + (uvw * uvPixelStride);
+
+        final int u = uBuffer[uvIndex];
+        final int v = vBuffer[uvIndex];
+
+        int r = (y + v * 1436 / 1024 - 179).round();
+        int g = (y - u * 46549 / 131072 + 44 - v * 93604 / 131072 + 91).round();
+        int b = (y + u * 1814 / 1024 - 227).round();
+
+        r = r.clamp(0, 255);
+        g = g.clamp(0, 255);
+        b = b.clamp(0, 255);
+
+        // Set the pixel with rotated coordinates
+        image.setPixelRgb(imageHeight - h - 1, w, r, g, b);
+      }
+    }
+
+    return image;
   }
 
   @override

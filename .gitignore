@@ -2,3 +2,4 @@ backend/venv
 .idea
 .vscode
 Backend/google-map-api/.env
+configure_fingerprint.bin
