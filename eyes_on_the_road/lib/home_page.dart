@@ -91,7 +91,9 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         body: Center(
-          child: CameraView(camera: firstCamera!, socket: socket),
+          child: firstCamera != null
+          ? CameraView(camera: firstCamera!, socket: socket)
+              : const CircularProgressIndicator()
         ),
         bottomNavigationBar: BottomAppBar(
           color: Theme.of(context).primaryColor,
