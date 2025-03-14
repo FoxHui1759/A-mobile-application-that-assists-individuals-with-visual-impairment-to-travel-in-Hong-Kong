@@ -22,6 +22,7 @@ class _CameraViewState extends State<CameraView> {
   String message = '';
 
   bool _inputting = false;
+  bool _serverReady = false;
 
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
@@ -32,7 +33,7 @@ class _CameraViewState extends State<CameraView> {
     //initialize the camera controller
     _controller = CameraController(
       widget.camera,
-      ResolutionPreset.high,
+      ResolutionPreset.medium,
       imageFormatGroup: ImageFormatGroup.yuv420,
       enableAudio: false,
     );
@@ -44,14 +45,24 @@ class _CameraViewState extends State<CameraView> {
       setState(() {
         message = 'start streaming';
       });
-      widget.socket.emit("message", message);
+      widget.socket.emit("initiate", message);
+
+      widget.socket.on("ready", (data) {
+        setState(() {
+          _serverReady = true;
+        });
+      });
+
       await _controller.startImageStream((CameraImage cameraImage) {
         //send the image to the server");
-        if (widget.socket.connected) {
+        if (_serverReady) {
           imglib.Image image = convertYUV420ToImage(cameraImage);
           String base64Image = base64Encode(imglib.encodeJpg(image));
 
           widget.socket.emit("image", base64Image);
+          setState(() {
+            _serverReady = false;
+          });
         }
       });
     });
