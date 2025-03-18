@@ -76,7 +76,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     });
 
     try {
-      // Request permissions with the improved step-by-step flow
+      // Request permissions with step-by-step flow
       final hasPermissions = await AppPermissions.checkAndRequestPermissions(context);
 
       if (hasPermissions) {

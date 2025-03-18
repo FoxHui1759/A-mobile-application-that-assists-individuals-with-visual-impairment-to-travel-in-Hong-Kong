@@ -1,5 +1,4 @@
 // lib/services/google_maps_service.dart
-// Modified to fix background isolate issues
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
@@ -14,13 +13,13 @@ class GoogleMapsService {
 
   GoogleMapsService({required this.apiKey});
 
-  /// Check network connectivity before making API requests
+  // Check network connectivity before making API requests
   Future<bool> _checkConnectivity() async {
     var connectivityResult = await Connectivity().checkConnectivity();
     return connectivityResult != ConnectivityResult.none;
   }
 
-  /// Helper to handle network errors consistently - with additional caching
+  // Helper to handle network errors consistently with additional caching
   Future<Map<String, dynamic>> _makeApiRequest(Uri uri, {bool useCache = true}) async {
     // Check the cache first if enabled
     final cacheKey = uri.toString();
@@ -71,7 +70,7 @@ class GoogleMapsService {
     }
   }
 
-  /// Check if the location string is in latitude,longitude format.
+  // Check if the location string is in latitude,longitude format.
   bool isCoordinates(String location) {
     final RegExp coordPattern =
     RegExp(r'^(-?\d+\.?\d*),\s*(-?\d+\.?\d*)$');
@@ -85,7 +84,7 @@ class GoogleMapsService {
     return false;
   }
 
-  /// Get coordinates from a location string if it's in lat,lng format
+  // Get coordinates from a location string if it's in lat,lng format
   Map<String, double>? extractCoordinates(String location) {
     final RegExp coordPattern =
     RegExp(r'^(-?\d+\.?\d*),\s*(-?\d+\.?\d*)$');
@@ -101,7 +100,7 @@ class GoogleMapsService {
     return null;
   }
 
-  /// Search for a place using the Google Places API or Geocoding API as fallback
+  // Search for a place using the Google Places API or Geocoding API as fallback
   Future<String> getPlaceLocation(String placeName, {bool useGeocoding = true}) async {
     try {
       // Check if we have internet connectivity
@@ -158,8 +157,7 @@ class GoogleMapsService {
     }
   }
 
-  /// If location is lat,lng coordinates, convert to a proper place name
-  /// FIXED: Moved platform channel operations to main isolate
+  // If location is lat,lng coordinates, convert to a proper place name
   Future<String> preprocessCoordinates(String location) async {
     try {
       if (isCoordinates(location)) {
@@ -208,12 +206,12 @@ class GoogleMapsService {
     }
   }
 
-  /// Decode a polyline - safe for compute
+  // Decode a polyline - safe for compute
   Future<List<Map<String, double>>> decodePolylineAsync(String polyline) async {
     return compute(_decodePolyline, polyline);
   }
 
-  /// Static method to decode polyline (for compute)
+  // Static method to decode polyline (for compute)
   static List<Map<String, double>> _decodePolyline(String polyline) {
     List<Map<String, double>> points = [];
     int index = 0;
@@ -254,7 +252,7 @@ class GoogleMapsService {
     return points;
   }
 
-  /// Compute approximate slope factor for a route - only performs computation
+  // Compute approximate slope factor for a route
   Future<double> computeRouteSlope(String routePolyline) async {
     // Simplified version that doesn't use compute, as it's not critical
     try {
@@ -272,7 +270,7 @@ class GoogleMapsService {
     }
   }
 
-  /// Recursively flattens nested steps in directions response
+  // Recursively flattens nested steps in directions response
   static List<dynamic> flattenSteps(List<dynamic> steps) {
     List<dynamic> flattened = [];
 
@@ -290,7 +288,7 @@ class GoogleMapsService {
     return flattened;
   }
 
-  /// Extract important navigation information from a step
+  // Extract important navigation information from a step
   static Map<String, dynamic> processStep(dynamic step) {
     final distance = step.containsKey('distance') ? step['distance']['text'] : 'N/A';
     final duration = step.containsKey('duration') ? step['duration']['text'] : 'N/A';
@@ -305,6 +303,12 @@ class GoogleMapsService {
         .replaceAll(RegExp(r'<div[^>]*>'), ', ')
         .replaceAll(RegExp(r'</div>'), '');
 
+    // Extract polyline if available
+    String polylinePoints = '';
+    if (step.containsKey('polyline') && step['polyline'] is Map && step['polyline'].containsKey('points')) {
+      polylinePoints = step['polyline']['points'] as String;
+    }
+
     return {
       'instructions': instructions,
       'distance': distance,
@@ -312,12 +316,16 @@ class GoogleMapsService {
       'start_location': step.containsKey('start_location') ? step['start_location'] : null,
       'end_location': step.containsKey('end_location') ? step['end_location'] : null,
       'maneuver': step.containsKey('maneuver') ? step['maneuver'] : '',
+      'polyline': polylinePoints, // Added polyline to the output
     };
   }
 
-  /// Get navigation path from origin to destination - FIXED: Removed compute calls that use platform channels
-  Future<Map<String, dynamic>> getNavigationPath(String origin, String destination) async {
-    print("Getting the path from $origin to $destination...");
+  // Get navigation path from origin to destination with language support
+  Future<Map<String, dynamic>> getNavigationPath(
+      String origin,
+      String destination,
+      {String languageCode = 'en-US'}) async {
+    print("Getting the path from $origin to $destination with language: $languageCode");
 
     // Check network connectivity
     if (!await _checkConnectivity()) {
@@ -331,7 +339,7 @@ class GoogleMapsService {
       'mode': 'walking',
       'departure_time': 'now',
       'alternatives': 'true',
-      'language': 'zh-HK',
+      'language': languageCode, // Use the provided language code
       'key': apiKey
     };
 
@@ -363,7 +371,7 @@ class GoogleMapsService {
     }
   }
 
-  /// Process route result - moved to main isolate to avoid platform channel issues
+  // Process route result and pick the best route
   Map<String, dynamic> _processRouteResult(Map<String, dynamic> res) {
     try {
       final routes = res.containsKey('routes')

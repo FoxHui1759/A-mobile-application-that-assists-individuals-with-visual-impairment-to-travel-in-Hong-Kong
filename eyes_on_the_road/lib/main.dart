@@ -10,6 +10,7 @@ import 'pages/home_page.dart';
 import 'services/google_maps_service.dart';
 import 'services/navigation_service.dart';
 import 'services/location_service.dart';
+import 'services/app_language_service.dart'; // Add this import
 import 'utils/connectivity_checker.dart';
 
 const String appTitle = 'Eyes on the Road';
@@ -121,6 +122,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         lazy: false, // Create this early as it's lightweight
       ),
 
+      // AppLanguageService - language preferences
+      ChangeNotifierProvider<AppLanguageService>(
+        create: (_) => AppLanguageService(),
+        lazy: false, // Initialize early since it's lightweight
+      ),
+
       // GoogleMapsService - lazy load
       Provider<GoogleMapsService>(
         create: (_) => GoogleMapsService(
@@ -136,13 +143,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       ),
 
       // NavigationService - depends on other services
-      ChangeNotifierProxyProvider2<GoogleMapsService, LocationService, NavigationService>(
+      ChangeNotifierProxyProvider3<GoogleMapsService, LocationService, AppLanguageService, NavigationService>(
         create: (context) => NavigationService(
-            Provider.of<GoogleMapsService>(context, listen: false),
-            Provider.of<LocationService>(context, listen: false)
+          Provider.of<GoogleMapsService>(context, listen: false),
+          Provider.of<LocationService>(context, listen: false),
+          Provider.of<AppLanguageService>(context, listen: false),
         ),
-        update: (context, mapsService, locationService, previous) =>
-        previous ?? NavigationService(mapsService, locationService),
+        update: (context, mapsService, locationService, languageService, previous) =>
+        previous ?? NavigationService(mapsService, locationService, languageService),
         lazy: true, // Only initialize when first accessed
       ),
     ];

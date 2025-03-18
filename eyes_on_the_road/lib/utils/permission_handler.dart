@@ -141,7 +141,7 @@ class AppPermissions {
         storageGranted && activityGranted;
   }
 
-  // A better-designed permission rationale dialog
+  // Permission rationale dialog
   static Future<bool> _showPermissionRationaleDialog(
       BuildContext context,
       String permissionType,
@@ -216,7 +216,7 @@ class AppPermissions {
     ) ?? false;
   }
 
-  // Open app settings - FIXED version
+  // Open app settings
   static Future<bool> openAppSettings() async {
     return await ph.openAppSettings();
   }

@@ -78,7 +78,7 @@ class LocationService extends ChangeNotifier {
     }
   }
 
-  // Get current position - optimized to reduce main thread work
+  // Get current position
   Future<void> getCurrentPosition() async {
     return _getCurrentPositionOptimized();
   }
@@ -88,13 +88,11 @@ class LocationService extends ChangeNotifier {
     try {
       _errorMessage = '';
 
-      // Run this on a background thread when possible
       final positionFuture = Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
         timeLimit: const Duration(seconds: 15),
       );
 
-      // Use compute for this, but it's not always possible due to platform channel limitations
       Position position;
       try {
         position = await positionFuture;
@@ -113,14 +111,14 @@ class LocationService extends ChangeNotifier {
     }
   }
 
-  // Start tracking location - optimized version
+  // Start tracking location
   Future<void> startTracking() async {
     if (_isTracking) return;
 
     try {
       _errorMessage = '';
 
-      // Define location settings - updated for newer geolocator version
+      // Define location settings
       const LocationSettings locationSettings = LocationSettings(
         accuracy: LocationAccuracy.high,
         distanceFilter: 10, // Update if moved 10 meters

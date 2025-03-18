@@ -4,12 +4,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/route_model.dart';
 import '../utils/connectivity_checker.dart';
+import '../utils/polyline_utils.dart';
 import 'google_maps_service.dart';
 import 'location_service.dart';
+import 'app_language_service.dart';
 
 class NavigationService extends ChangeNotifier {
   final GoogleMapsService _mapsService;
   final LocationService _locationService;
+  final AppLanguageService _languageService;
 
   // Navigation state
   RouteModel? _currentRoute;
@@ -22,8 +25,8 @@ class NavigationService extends ChangeNotifier {
   // Location tracking
   Timer? _locationCheckTimer;
   static const int _locationCheckIntervalSeconds = 5;
-  static const double _waypointReachedThresholdMeters = 30.0; // Increased from 15 to 30 meters
-  static const double _routeThresholdMeters = 100.0; // Increased from 50 to 100 meters for off-route detection
+  static const double _waypointReachedThresholdMeters = 30.0;
+  static const double _routeThresholdMeters = 100.0; // Distance threshold for off-route detection
 
   // Enhanced navigation information
   String _distanceToNextStep = '';
@@ -35,7 +38,11 @@ class NavigationService extends ChangeNotifier {
   DateTime? _navigationStartTime;
   static const int _offRouteGracePeriodSeconds = 15;
 
-  NavigationService(this._mapsService, this._locationService);
+  NavigationService(
+      this._mapsService,
+      this._locationService,
+      this._languageService,
+      );
 
   // Getters
   RouteModel? get currentRoute => _currentRoute;
@@ -100,7 +107,7 @@ class NavigationService extends ChangeNotifier {
     return _currentRoute!.getNextManeuver(_currentStepIndex);
   }
 
-  // Start navigation to a destination - FIXED version
+  // Start navigation to a destination
   Future<void> startNavigation(String destination) async {
     _isLoading = true;
     _error = '';
@@ -139,8 +146,9 @@ class NavigationService extends ChangeNotifier {
 
       // Get navigation path directly on main isolate
       final routeData = await _mapsService.getNavigationPath(
-          processedStart,
-          processedDestination
+        processedStart,
+        processedDestination,
+        languageCode: _languageService.currentLanguageCode, // Use the selected language
       );
 
       // Create route model
@@ -286,7 +294,7 @@ class NavigationService extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Check if user is off the route path - FIXED with grace period
+  // Check if user is off the route path - IMPROVED with polyline distance
   void _checkIfOffRoute() {
     if (!_locationService.hasLocation || _currentRoute == null) return;
 
@@ -303,20 +311,83 @@ class NavigationService extends ChangeNotifier {
       }
     }
 
-    // This is a simplified off-route detection. In a real app, you'd check
-    // the distance to the polyline of the route path.
+    // Get user's current position
+    final userLat = _locationService.currentPosition!.latitude;
+    final userLng = _locationService.currentPosition!.longitude;
 
-    // First check current step
+    // Check if we have the overview polyline to use for off-route detection
+    if (_currentRoute!.overviewPolyline.isNotEmpty) {
+      // Decode the overview polyline
+      final routePoints = PolylineUtils.decodePolyline(_currentRoute!.overviewPolyline);
+
+      // Calculate minimum distance to the route polyline
+      final distanceToRoute = PolylineUtils.distanceToPolyline(userLat, userLng, routePoints);
+
+      debugPrint('Distance to route: $distanceToRoute meters');
+
+      // Check if we're close enough to the route
+      final bool wasOffRoute = _isOffRoute;
+      _isOffRoute = distanceToRoute > _routeThresholdMeters;
+
+      // Only notify if status changed
+      if (wasOffRoute != _isOffRoute) {
+        notifyListeners();
+      }
+      return;
+    }
+
+    // Fallback method if overview polyline isn't available
+    // Try to use the polyline of the current step or nearby steps
+
+    // First check current step and collect polyline points
+    List<Map<String, double>> stepPolylinePoints = [];
+
+    // Current step polyline
     final currentStep = _currentRoute!.steps[_currentStepIndex];
+    if (currentStep.polyline.isNotEmpty) {
+      stepPolylinePoints.addAll(PolylineUtils.decodePolyline(currentStep.polyline));
+    }
+
+    // Add previous step polyline (if not first step)
+    if (_currentStepIndex > 0) {
+      final prevStep = _currentRoute!.steps[_currentStepIndex - 1];
+      if (prevStep.polyline.isNotEmpty) {
+        stepPolylinePoints.addAll(PolylineUtils.decodePolyline(prevStep.polyline));
+      }
+    }
+
+    // Add next step polyline (if not last step)
+    if (_currentStepIndex < _currentRoute!.steps.length - 1) {
+      final nextStep = _currentRoute!.steps[_currentStepIndex + 1];
+      if (nextStep.polyline.isNotEmpty) {
+        stepPolylinePoints.addAll(PolylineUtils.decodePolyline(nextStep.polyline));
+      }
+    }
+
+    // If we have points from polylines, use them for distance calculation
+    if (stepPolylinePoints.isNotEmpty) {
+      final distanceToPolyline = PolylineUtils.distanceToPolyline(userLat, userLng, stepPolylinePoints);
+      debugPrint('Distance to step polyline: $distanceToPolyline meters');
+
+      final bool wasOffRoute = _isOffRoute;
+      _isOffRoute = distanceToPolyline > _routeThresholdMeters;
+
+      // Only notify if status changed
+      if (wasOffRoute != _isOffRoute) {
+        notifyListeners();
+      }
+      return;
+    }
+
+    // Last resort: use the old distance to endpoints method if no polylines are available
+
+    // Check distance to current step endpoint
     if (currentStep.endLocation != null) {
       final endLat = currentStep.endLocation!['lat'] as double;
       final endLng = currentStep.endLocation!['lng'] as double;
 
       final double distanceMeters = _locationService.getDistanceBetween(
-          _locationService.currentPosition!.latitude,
-          _locationService.currentPosition!.longitude,
-          endLat,
-          endLng
+          userLat, userLng, endLat, endLng
       );
 
       // If within threshold of current step, we're not off route
@@ -336,10 +407,7 @@ class NavigationService extends ChangeNotifier {
           final nextEndLng = nextStep.endLocation!['lng'] as double;
 
           final double nextDistanceMeters = _locationService.getDistanceBetween(
-              _locationService.currentPosition!.latitude,
-              _locationService.currentPosition!.longitude,
-              nextEndLat,
-              nextEndLng
+              userLat, userLng, nextEndLat, nextEndLng
           );
 
           // If within threshold of next step, we're not off route
@@ -416,7 +484,7 @@ class NavigationService extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Manually recalculate route (for when user is off-route) - FIXED version
+  // Manually recalculate route (for when user is off-route)
   Future<void> recalculateRoute() async {
     if (!_isNavigating || !_locationService.hasLocation) return;
 
@@ -434,8 +502,9 @@ class NavigationService extends ChangeNotifier {
 
       // Get new navigation path directly
       final routeData = await _mapsService.getNavigationPath(
-          processedStart,
-          processedDestination
+        processedStart,
+        processedDestination,
+        languageCode: _languageService.currentLanguageCode,
       );
 
       // Update route model

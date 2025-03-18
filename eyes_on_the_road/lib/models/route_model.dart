@@ -6,6 +6,7 @@ class RouteStep {
   final Map<String, dynamic>? startLocation;
   final Map<String, dynamic>? endLocation;
   final String maneuver;
+  final String polyline; // Added polyline field
 
   RouteStep({
     required this.instructions,
@@ -14,9 +15,16 @@ class RouteStep {
     this.startLocation,
     this.endLocation,
     this.maneuver = '',
+    this.polyline = '', // Default to empty string
   });
 
   factory RouteStep.fromJson(Map<String, dynamic> json) {
+    // Extract polyline if available
+    String polylineStr = '';
+    if (json.containsKey('polyline') && json['polyline'] is Map && json['polyline'].containsKey('points')) {
+      polylineStr = json['polyline']['points'] as String;
+    }
+
     return RouteStep(
       instructions: json['instructions'] ?? '',
       distance: json['distance'] ?? '',
@@ -24,6 +32,7 @@ class RouteStep {
       startLocation: json['start_location'],
       endLocation: json['end_location'],
       maneuver: json['maneuver'] ?? '',
+      polyline: polylineStr,
     );
   }
 }
@@ -35,6 +44,7 @@ class RouteModel {
   final String endAddress;
   final List<RouteStep> steps;
   final Map<String, dynamic> rawRoute;
+  final String overviewPolyline; // Added overview polyline field
 
   RouteModel({
     required this.totalDistance,
@@ -43,6 +53,7 @@ class RouteModel {
     required this.endAddress,
     required this.steps,
     required this.rawRoute,
+    this.overviewPolyline = '', // Default to empty string
   });
 
   factory RouteModel.fromJson(Map<String, dynamic> json) {
@@ -53,6 +64,16 @@ class RouteModel {
       }
     }
 
+    // Extract overview polyline from route
+    String overviewLine = '';
+    if (json.containsKey('route') &&
+        json['route'] is Map &&
+        json['route'].containsKey('overview_polyline') &&
+        json['route']['overview_polyline'] is Map &&
+        json['route']['overview_polyline'].containsKey('points')) {
+      overviewLine = json['route']['overview_polyline']['points'] as String;
+    }
+
     return RouteModel(
       totalDistance: json['total_distance'] ?? '',
       totalDuration: json['total_duration'] ?? '',
@@ -60,6 +81,7 @@ class RouteModel {
       endAddress: json['end_address'] ?? '',
       steps: stepsList,
       rawRoute: json['route'] ?? {},
+      overviewPolyline: overviewLine,
     );
   }
 
