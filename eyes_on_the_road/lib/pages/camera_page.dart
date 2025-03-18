@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/sst_service.dart';
+import '../services/stt_service.dart';
 
 class CameraPage extends StatefulWidget {
   const CameraPage({super.key});
