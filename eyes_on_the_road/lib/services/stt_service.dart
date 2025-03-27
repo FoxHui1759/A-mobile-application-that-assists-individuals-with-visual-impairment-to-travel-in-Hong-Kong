@@ -1,10 +1,19 @@
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'tts_service.dart';
 
 class SpeechService {
   final stt.SpeechToText _speech = stt.SpeechToText();
-  bool _isListening = false;
+  final TtsService _tts = TtsService();
 
-  Future<bool> initialize() async {
+  String recognizedWords = '';
+  bool _isListening = false;
+  String _localeId = 'zh_HK';
+
+  // Initialize with optional locale parameter
+  Future<bool> initialize({String? localeId}) async {
+    if (localeId != null) {
+      _localeId = localeId;
+    }
     return await _speech.initialize(
       onStatus: (status) => print('Speech Status: $status'),
       onError: (error) => print('Speech Error: $error'),
@@ -16,11 +25,11 @@ class SpeechService {
       _isListening = true;
       await _speech.listen(
         onResult: (result) {
-          print('Recognized Speech: ${result.recognizedWords}');
+          recognizedWords = result.recognizedWords;
         },
-        listenFor: Duration(seconds: 60),
-        pauseFor: Duration(seconds: 3),
-        localeId: 'en_US',
+        listenFor: const Duration(seconds: 60),
+        pauseFor: const Duration(seconds: 3),
+        localeId: _localeId,
       );
     }
   }
@@ -32,5 +41,10 @@ class SpeechService {
     }
   }
 
+  void setLocale(String localeId) {
+    _localeId = localeId;
+  }
+
   bool get isListening => _isListening;
+  String get localeId => _localeId;
 }

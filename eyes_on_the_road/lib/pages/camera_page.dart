@@ -24,15 +24,16 @@ class _CameraPageState extends State<CameraPage> {
   void _showMicrophone() {
     setState(() {
       _inputting = true;
-      _speechService.startListening();
     });
+    _speechService.startListening();
   }
 
-  void _hideMicrophone() {
+  void _hideMicrophone() async {
+    await Future.delayed(const Duration(seconds: 2));
     setState(() {
       _inputting = false;
-      _speechService.stopListening();
     });
+    _speechService.stopListening();
   }
 
   @override

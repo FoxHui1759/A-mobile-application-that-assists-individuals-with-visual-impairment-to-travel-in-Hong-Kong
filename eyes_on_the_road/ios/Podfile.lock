@@ -6,12 +6,15 @@ PODS:
   - speech_to_text (0.0.1):
     - Flutter
     - Try
+  - text_to_speech (0.0.1):
+    - Flutter
   - Try (2.1.1)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - speech_to_text (from `.symlinks/plugins/speech_to_text/ios`)
+  - text_to_speech (from `.symlinks/plugins/text_to_speech/ios`)
 
 SPEC REPOS:
   trunk:
@@ -24,11 +27,14 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
   speech_to_text:
     :path: ".symlinks/plugins/speech_to_text/ios"
+  text_to_speech:
+    :path: ".symlinks/plugins/text_to_speech/ios"
 
 SPEC CHECKSUMS:
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   speech_to_text: ae2abc312e619ff1c53e675a9fc4d785a15c03bb
+  text_to_speech: 94cb6c54446c65feaf0007e444113f922fe1fc99
   Try: 5ef669ae832617b3cee58cb2c6f99fb767a4ff96
 
 PODFILE CHECKSUM: 4305caec6b40dde0ae97be1573c53de1882a07e5
