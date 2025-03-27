@@ -1,6 +1,5 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'views/camera_view.dart';
 
 class HomePage extends StatefulWidget {
@@ -17,41 +16,10 @@ class _HomePageState extends State<HomePage> {
 
   String message = '';
 
-  final IO.Socket socket = IO.io('http://192.168.1.101:9999', <String, dynamic>{
-    'transports': ['websocket'],
-    'autoConnect': false,
-  });
-
   @override
   void initState() {
-    _initializeSocket();
     _initializeCamera();
-
     super.initState();
-  }
-
-  void _initializeSocket() {
-    socket.connect();
-    socket.onConnect((_) {
-      setState(() {
-        message = 'Connected';
-      });
-    });
-    socket.onDisconnect((_) {
-      setState(() {
-        message = 'Disconnected';
-      });
-    });
-    socket.onConnectError((data) {
-      setState(() {
-        message = 'Error: $data';
-      });
-    });
-    socket.onError((data) {
-      setState(() {
-        message = 'Error: $data';
-      });
-    });
   }
 
   void _initializeCamera() async {
@@ -91,10 +59,9 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         body: Center(
-          child: firstCamera != null
-          ? CameraView(camera: firstCamera!, socket: socket)
-              : const CircularProgressIndicator()
-        ),
+            child: firstCamera != null
+                ? CameraView(camera: firstCamera!)
+                : const CircularProgressIndicator()),
         bottomNavigationBar: BottomAppBar(
           color: Theme.of(context).primaryColor,
           child: SizedBox(

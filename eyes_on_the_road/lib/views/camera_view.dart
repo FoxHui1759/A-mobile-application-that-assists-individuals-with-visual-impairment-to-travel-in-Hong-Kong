@@ -2,14 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:image/image.dart' as imglib;
 
 class CameraView extends StatefulWidget {
-  const CameraView({super.key, required this.camera, required this.socket});
+  const CameraView({super.key, required this.camera});
 
   final CameraDescription camera;
-  final IO.Socket socket;
   @override
   _CameraViewState createState() => _CameraViewState();
 }
@@ -45,13 +43,6 @@ class _CameraViewState extends State<CameraView> {
       setState(() {
         message = 'start streaming';
       });
-      widget.socket.emit("initiate", message);
-
-      widget.socket.on("ready", (data) {
-        setState(() {
-          _serverReady = true;
-        });
-      });
 
       await _controller.startImageStream((CameraImage cameraImage) {
         //send the image to the server");
@@ -59,7 +50,6 @@ class _CameraViewState extends State<CameraView> {
           imglib.Image image = convertYUV420ToImage(cameraImage);
           String base64Image = base64Encode(imglib.encodeJpg(image));
 
-          widget.socket.emit("image", base64Image);
           setState(() {
             _serverReady = false;
           });
