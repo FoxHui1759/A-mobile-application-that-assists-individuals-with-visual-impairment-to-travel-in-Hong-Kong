@@ -8,7 +8,7 @@ class AppLanguageService extends ChangeNotifier {
 
   // Default to English
   String _currentLanguageCode = englishCode;
-  bool _isInitialized = true;
+  final bool _isInitialized = true;
 
   // Getters
   String get currentLanguageCode => _currentLanguageCode;

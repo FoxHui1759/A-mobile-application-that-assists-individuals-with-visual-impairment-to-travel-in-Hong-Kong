@@ -84,6 +84,32 @@ class _CameraPageState extends State<CameraPage> {
     Provider.of<NavigationService>(context, listen: false).recalculateRoute();
   }
 
+  void _useAlternativeRoute(BuildContext context) async {
+    // Check connectivity first
+    final connectivityChecker = ConnectivityChecker();
+    final isConnected = await connectivityChecker.isConnected();
+
+    if (!isConnected) {
+      if (context.mounted) {
+        await connectivityChecker.showNoInternetDialog(context);
+      }
+      return;
+    }
+
+    try {
+      await Provider.of<NavigationService>(context, listen: false).useAlternativeRoute();
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error switching routes: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   void _toggleAutoAdvance(BuildContext context) {
     Provider.of<NavigationService>(context, listen: false).toggleAutoAdvance();
   }
@@ -237,6 +263,21 @@ class _CameraPageState extends State<CameraPage> {
                                             style: const TextStyle(color: Colors.white, fontSize: 12),
                                           ),
                                         ),
+
+                                        // Alternative Route button (only shown when alternatives available)
+                                        if (navigationService.hasAlternativeRoutes)
+                                          ElevatedButton.icon(
+                                            onPressed: () => _useAlternativeRoute(context),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.blue[700],
+                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                            ),
+                                            icon: const Icon(Icons.alt_route, color: Colors.white, size: 18),
+                                            label: const Text(
+                                              'Alternative',
+                                              style: TextStyle(color: Colors.white, fontSize: 12),
+                                            ),
+                                          ),
 
                                         // Recalculate route button (only shown when off-route)
                                         if (navigationService.isOffRoute)
@@ -502,6 +543,24 @@ class _CameraPageState extends State<CameraPage> {
                       onRetry: navigationService.isNavigating
                           ? () => _recalculateRoute(context)
                           : null,
+                    ),
+                  ),
+                ),
+
+              // Route information indicator
+              if (navigationService.isNavigating && navigationService.hasAlternativeRoutes)
+                Positioned(
+                  top: 65,
+                  right: 15,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[700],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'Route ${navigationService.currentRouteIndex + 1}/${navigationService.alternativeRouteCount}',
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
                     ),
                   ),
                 ),

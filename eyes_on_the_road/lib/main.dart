@@ -55,7 +55,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   bool _isInitialized = false;
 
   // Minimalist initialization flag
-  bool _canProceed = true;
+  final bool _canProceed = true;
 
   @override
   void initState() {

@@ -1,5 +1,6 @@
 // lib/services/navigation_service.dart
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/route_model.dart';
@@ -21,22 +22,38 @@ class NavigationService extends ChangeNotifier {
   String _destination = '';
   String _error = '';
   bool _isLoading = false;
+  int _currentRouteIndex = 0;
+  int _alternativeRouteCount = 0;
 
   // Location tracking
   Timer? _locationCheckTimer;
-  static const int _locationCheckIntervalSeconds = 5;
+  static const int _locationCheckIntervalSeconds = 2; // Reduced from 5 to 2 seconds
   static const double _waypointReachedThresholdMeters = 30.0;
   static const double _routeThresholdMeters = 100.0; // Distance threshold for off-route detection
 
   // Enhanced navigation information
   String _distanceToNextStep = '';
-  String _nextManeuverInfo = '';
+  final String _nextManeuverInfo = '';
   bool _isOffRoute = false;
   bool _autoAdvance = true; // Flag to enable/disable auto-advancement to next step
+
+  // Add more detailed distance tracking
+  double _distanceToNextStepMeters = 0.0;
+  double _distanceToDestinationMeters = 0.0;
+  Duration _estimatedTimeToDestination = Duration.zero;
+  String _estimatedArrivalTime = '';
+
+  // Add progress tracking
+  double _routeProgress = 0.0;  // 0.0 to 1.0
+  double _stepProgress = 0.0;   // 0.0 to 1.0
 
   // Add a grace period to avoid immediate off-route detection
   DateTime? _navigationStartTime;
   static const int _offRouteGracePeriodSeconds = 15;
+
+  // Add timer for real-time distance updates
+  Timer? _distanceUpdateTimer;
+  static const int _distanceUpdateIntervalMillis = 1000; // Update every second
 
   NavigationService(
       this._mapsService,
@@ -53,6 +70,15 @@ class NavigationService extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isOffRoute => _isOffRoute;
   bool get autoAdvance => _autoAdvance;
+  double get routeProgress => _routeProgress;
+  double get stepProgress => _stepProgress;
+  double get distanceToNextStepMeters => _distanceToNextStepMeters;
+  double get distanceToDestinationMeters => _distanceToDestinationMeters;
+  Duration get estimatedTimeToDestination => _estimatedTimeToDestination;
+  String get estimatedArrivalTime => _estimatedArrivalTime;
+  int get currentRouteIndex => _currentRouteIndex;
+  int get alternativeRouteCount => _alternativeRouteCount;
+  bool get hasAlternativeRoutes => _alternativeRouteCount > 1;
 
   // Enhanced navigation getters
   String get distanceToNextStep => _distanceToNextStep;
@@ -157,14 +183,24 @@ class NavigationService extends ChangeNotifier {
       _isNavigating = true;
       _isOffRoute = false;
 
+      // Store route index and count
+      _currentRouteIndex = routeData['route_index'] ?? 0;
+      _alternativeRouteCount = routeData['alternative_count'] ?? 1;
+
       // Set navigation start time for grace period
       _navigationStartTime = DateTime.now();
 
       // Start location check timer for automatic step advancement
       _startLocationCheckTimer();
 
+      // Start distance update timer for real-time distance updates
+      _startDistanceUpdateTimer();
+
       // Update initial distance to next step
-      _updateDistanceToNextStep();
+      _calculateDistanceToNextStep();
+
+      // Calculate initial estimated time of arrival
+      _calculateEstimatedArrival();
 
     } catch (e) {
       _error = e.toString();
@@ -202,10 +238,22 @@ class NavigationService extends ChangeNotifier {
     // Cancel existing timer if any
     _locationCheckTimer?.cancel();
 
-    // Create new timer
+    // Create new timer with reduced interval
     _locationCheckTimer = Timer.periodic(
         Duration(seconds: _locationCheckIntervalSeconds),
             (_) => _checkLocationOnRoute()
+    );
+  }
+
+  // Start timer for real-time distance updates
+  void _startDistanceUpdateTimer() {
+    // Cancel existing timer if any
+    _distanceUpdateTimer?.cancel();
+
+    // Create new timer for more frequent updates
+    _distanceUpdateTimer = Timer.periodic(
+        Duration(milliseconds: _distanceUpdateIntervalMillis),
+            (_) => _calculateDistanceToNextStep()
     );
   }
 
@@ -214,9 +262,6 @@ class NavigationService extends ChangeNotifier {
     if (!_isNavigating || _currentRoute == null || !_locationService.hasLocation) {
       return;
     }
-
-    // Use compute for this operation if it becomes expensive
-    _updateDistanceToNextStep();
 
     // Check if user has reached the destination (last step)
     if (_currentStepIndex >= _currentRoute!.steps.length - 1) {
@@ -240,6 +285,9 @@ class NavigationService extends ChangeNotifier {
 
     // Check if user is off route (but respect grace period)
     _checkIfOffRoute();
+
+    // Update progress values
+    _updateRouteProgress();
   }
 
   // Check if user is near a specific waypoint
@@ -256,11 +304,12 @@ class NavigationService extends ChangeNotifier {
     );
   }
 
-  // Update distance to next waypoint based on current location
-  void _updateDistanceToNextStep() {
+  // Calculate distance to next waypoint
+  void _calculateDistanceToNextStep() {
     if (!_locationService.hasLocation || _currentRoute == null ||
         _currentStepIndex >= _currentRoute!.steps.length) {
       _distanceToNextStep = '';
+      _distanceToNextStepMeters = 0.0;
       return;
     }
 
@@ -270,19 +319,25 @@ class NavigationService extends ChangeNotifier {
     // If no end location for step, can't calculate distance
     if (step.endLocation == null) {
       _distanceToNextStep = step.distance;
+      // Try to extract meters from the text distance
+      _extractDistanceMeters(step.distance);
       return;
     }
 
     // Calculate distance from current location to end of step
+    final currentPosition = _locationService.currentPosition!;
     final double endLat = step.endLocation!['lat'];
     final double endLng = step.endLocation!['lng'];
 
     final double distanceMeters = _locationService.getDistanceBetween(
-        _locationService.currentPosition!.latitude,
-        _locationService.currentPosition!.longitude,
+        currentPosition.latitude,
+        currentPosition.longitude,
         endLat,
         endLng
     );
+
+    // Store raw distance in meters
+    _distanceToNextStepMeters = distanceMeters;
 
     // Format distance for display
     if (distanceMeters > 1000) {
@@ -291,7 +346,214 @@ class NavigationService extends ChangeNotifier {
       _distanceToNextStep = '${distanceMeters.round()} m';
     }
 
+    // Also calculate distance to final destination (for ETA purposes)
+    _calculateDistanceToDestination();
+
+    // Update step progress
+    if (_currentStepIndex < _currentRoute!.steps.length) {
+      _updateStepProgress(distanceMeters, step);
+    }
+
     notifyListeners();
+  }
+
+  // Helper to extract distance in meters from text
+  void _extractDistanceMeters(String distanceText) {
+    // Format examples: "500 m", "1.2 km"
+    try {
+      if (distanceText.contains('km')) {
+        // Extract kilometers
+        final kmStr = distanceText.replaceAll('km', '').trim();
+        _distanceToNextStepMeters = double.parse(kmStr) * 1000;
+      } else if (distanceText.contains('m')) {
+        // Extract meters
+        final mStr = distanceText.replaceAll('m', '').trim();
+        _distanceToNextStepMeters = double.parse(mStr);
+      }
+    } catch (e) {
+      debugPrint('Error extracting distance from text: $e');
+      _distanceToNextStepMeters = 0.0;
+    }
+  }
+
+  // Calculate distance to final destination (used for ETA calculations)
+  void _calculateDistanceToDestination() {
+    if (!_locationService.hasLocation || _currentRoute == null) {
+      _distanceToDestinationMeters = 0.0;
+      return;
+    }
+
+    // Get the final step
+    final finalStep = _currentRoute!.steps.last;
+    if (finalStep.endLocation == null) {
+      return;
+    }
+
+    // Get current position for calculation
+    final currentPosition = _locationService.currentPosition!;
+
+    // Calculate direct distance to final destination
+    final double destLat = finalStep.endLocation!['lat'];
+    final double destLng = finalStep.endLocation!['lng'];
+
+    _distanceToDestinationMeters = _locationService.getDistanceBetween(
+        currentPosition.latitude,
+        currentPosition.longitude,
+        destLat,
+        destLng
+    );
+
+    // Update estimated arrival time if distance changed significantly
+    _calculateEstimatedArrival();
+  }
+
+  // Calculate estimated time of arrival
+  void _calculateEstimatedArrival() {
+    if (_currentRoute == null || !_isNavigating) {
+      _estimatedTimeToDestination = Duration.zero;
+      _estimatedArrivalTime = '';
+      return;
+    }
+
+    try {
+      // Extract total duration in seconds from route
+      final String durationString = _currentRoute!.totalDuration;
+      int totalSeconds = 0;
+
+      // Parse duration string (e.g., "10 mins" or "1 hour 5 mins")
+      if (durationString.contains('hour')) {
+        final hourParts = durationString.split('hour');
+        final hours = int.parse(hourParts[0].trim());
+        totalSeconds += hours * 3600;
+
+        if (hourParts.length > 1 && hourParts[1].contains('min')) {
+          final minutesStr = hourParts[1].replaceAll('mins', '').replaceAll('min', '').trim();
+          final minutes = int.parse(minutesStr);
+          totalSeconds += minutes * 60;
+        }
+      } else if (durationString.contains('min')) {
+        final minutesStr = durationString.replaceAll('mins', '').replaceAll('min', '').trim();
+        final minutes = int.parse(minutesStr);
+        totalSeconds += minutes * 60;
+      }
+
+      // Adjust based on progress if already on route
+      if (_routeProgress > 0 && _routeProgress < 1) {
+        totalSeconds = (totalSeconds * (1 - _routeProgress)).toInt();
+      }
+
+      // Set the estimated time to destination
+      _estimatedTimeToDestination = Duration(seconds: totalSeconds);
+
+      // Calculate estimated arrival time
+      final now = DateTime.now();
+      final arrival = now.add(_estimatedTimeToDestination);
+
+      // Format time as HH:MM
+      final hour = arrival.hour.toString().padLeft(2, '0');
+      final minute = arrival.minute.toString().padLeft(2, '0');
+      _estimatedArrivalTime = '$hour:$minute';
+    } catch (e) {
+      debugPrint('Error calculating ETA: $e');
+      _estimatedTimeToDestination = Duration.zero;
+      _estimatedArrivalTime = '';
+    }
+  }
+
+  // Update the progress along the current step
+  void _updateStepProgress(double distanceToEndOfStep, RouteStep step) {
+    try {
+      // Extract the total step distance in meters
+      final String totalDistanceStr = step.distance;
+      double totalStepDistanceMeters = 0;
+
+      if (totalDistanceStr.contains('km')) {
+        final kmStr = totalDistanceStr.replaceAll('km', '').trim();
+        totalStepDistanceMeters = double.parse(kmStr) * 1000;
+      } else if (totalDistanceStr.contains('m')) {
+        final mStr = totalDistanceStr.replaceAll('m', '').trim();
+        totalStepDistanceMeters = double.parse(mStr);
+      }
+
+      if (totalStepDistanceMeters > 0) {
+        // Calculate progress as percentage completed
+        _stepProgress = 1.0 - (distanceToEndOfStep / totalStepDistanceMeters);
+
+        // Clamp to valid range
+        _stepProgress = math.min(1.0, math.max(0.0, _stepProgress));
+      }
+    } catch (e) {
+      debugPrint('Error updating step progress: $e');
+      _stepProgress = 0.0;
+    }
+  }
+
+  // Update overall route progress
+  void _updateRouteProgress() {
+    try {
+      if (_currentRoute == null || !_isNavigating) {
+        _routeProgress = 0.0;
+        return;
+      }
+
+      // Calculate progress based on completed steps and current step progress
+      double totalDistance = _extractTotalDistanceMeters(_currentRoute!.totalDistance);
+      double coveredDistance = 0;
+
+      // Sum distances of completed steps
+      for (int i = 0; i < _currentStepIndex; i++) {
+        coveredDistance += _extractStepDistanceMeters(_currentRoute!.steps[i].distance);
+      }
+
+      // Add partial distance of current step
+      if (_currentStepIndex < _currentRoute!.steps.length) {
+        double currentStepTotal = _extractStepDistanceMeters(_currentRoute!.steps[_currentStepIndex].distance);
+        coveredDistance += currentStepTotal * _stepProgress;
+      }
+
+      // Calculate progress as percentage
+      if (totalDistance > 0) {
+        _routeProgress = coveredDistance / totalDistance;
+
+        // Clamp to valid range
+        _routeProgress = math.min(1.0, math.max(0.0, _routeProgress));
+      }
+    } catch (e) {
+      debugPrint('Error updating route progress: $e');
+      _routeProgress = 0.0;
+    }
+  }
+
+  // Helper to extract distance in meters from step distance
+  double _extractStepDistanceMeters(String distanceText) {
+    try {
+      if (distanceText.contains('km')) {
+        final kmStr = distanceText.replaceAll('km', '').trim();
+        return double.parse(kmStr) * 1000;
+      } else if (distanceText.contains('m')) {
+        final mStr = distanceText.replaceAll('m', '').trim();
+        return double.parse(mStr);
+      }
+    } catch (e) {
+      debugPrint('Error extracting step distance: $e');
+    }
+    return 0.0;
+  }
+
+  // Helper to extract total distance in meters from route
+  double _extractTotalDistanceMeters(String distanceText) {
+    try {
+      if (distanceText.contains('km')) {
+        final kmStr = distanceText.replaceAll('km', '').trim();
+        return double.parse(kmStr) * 1000;
+      } else if (distanceText.contains('m')) {
+        final mStr = distanceText.replaceAll('m', '').trim();
+        return double.parse(mStr);
+      }
+    } catch (e) {
+      debugPrint('Error extracting total distance: $e');
+    }
+    return 0.0;
   }
 
   // Check if user is off the route path - IMPROVED with polyline distance
@@ -312,8 +574,9 @@ class NavigationService extends ChangeNotifier {
     }
 
     // Get user's current position
-    final userLat = _locationService.currentPosition!.latitude;
-    final userLng = _locationService.currentPosition!.longitude;
+    final position = _locationService.currentPosition!;
+    final userLat = position.latitude;
+    final userLng = position.longitude;
 
     // Check if we have the overview polyline to use for off-route detection
     if (_currentRoute!.overviewPolyline.isNotEmpty) {
@@ -450,7 +713,8 @@ class NavigationService extends ChangeNotifier {
   void nextStep() {
     if (_currentRoute != null && _currentStepIndex < _currentRoute!.steps.length - 1) {
       _currentStepIndex++;
-      _updateDistanceToNextStep();
+      _calculateDistanceToNextStep();
+      _stepProgress = 0.0; // Reset step progress for new step
       notifyListeners();
     }
   }
@@ -459,7 +723,8 @@ class NavigationService extends ChangeNotifier {
   void previousStep() {
     if (_currentRoute != null && _currentStepIndex > 0) {
       _currentStepIndex--;
-      _updateDistanceToNextStep();
+      _calculateDistanceToNextStep();
+      _stepProgress = 0.0; // Reset step progress for new step
       notifyListeners();
     }
   }
@@ -473,10 +738,21 @@ class NavigationService extends ChangeNotifier {
     _distanceToNextStep = '';
     _isOffRoute = false;
     _navigationStartTime = null;
+    _routeProgress = 0.0;
+    _stepProgress = 0.0;
+    _distanceToNextStepMeters = 0.0;
+    _distanceToDestinationMeters = 0.0;
+    _estimatedTimeToDestination = Duration.zero;
+    _estimatedArrivalTime = '';
+    _currentRouteIndex = 0;
+    _alternativeRouteCount = 0;
 
-    // Cancel timer
+    // Cancel timers
     _locationCheckTimer?.cancel();
     _locationCheckTimer = null;
+
+    _distanceUpdateTimer?.cancel();
+    _distanceUpdateTimer = null;
 
     // Stop location tracking
     _locationService.stopTracking();
@@ -512,8 +788,15 @@ class NavigationService extends ChangeNotifier {
       _currentStepIndex = 0;
       _isOffRoute = false;
       _navigationStartTime = DateTime.now(); // Reset grace period for new route
+      _stepProgress = 0.0;
+      _routeProgress = 0.0;
 
-      _updateDistanceToNextStep();
+      // Store route index and count
+      _currentRouteIndex = routeData['route_index'] ?? 0;
+      _alternativeRouteCount = routeData['alternative_count'] ?? 1;
+
+      _calculateDistanceToNextStep();
+      _calculateEstimatedArrival();
     } catch (e) {
       _error = 'Failed to recalculate route: ${e.toString()}';
     } finally {
@@ -522,9 +805,85 @@ class NavigationService extends ChangeNotifier {
     }
   }
 
+  // Use alternative route
+  Future<void> useAlternativeRoute() async {
+    if (!_isNavigating || !_locationService.hasLocation) return;
+
+    // Check if we have alternatives available
+    if (_alternativeRouteCount <= 1) {
+      _error = 'No alternative routes available';
+      notifyListeners();
+      return;
+    }
+
+    _isLoading = true;
+    _error = '';
+    notifyListeners();
+
+    try {
+      // Get current location as starting point
+      final String startLocation = _locationService.currentLocationString;
+
+      // Process locations
+      final processedStart = await _mapsService.preprocessCoordinates(startLocation);
+      final processedDestination = await _mapsService.preprocessCoordinates(_destination);
+
+      // Get an alternative route
+      final routeData = await _mapsService.getAlternativeRoute(
+        processedStart,
+        processedDestination,
+        languageCode: _languageService.currentLanguageCode,
+        currentRouteIndex: _currentRouteIndex,
+      );
+
+      // Update route model
+      _currentRoute = RouteModel.fromJson(routeData);
+      _currentStepIndex = 0;
+      _isOffRoute = false;
+      _navigationStartTime = DateTime.now(); // Reset grace period for new route
+      _stepProgress = 0.0;
+      _routeProgress = 0.0;
+
+      // Store route index
+      _currentRouteIndex = routeData['route_index'] ?? 0;
+      _alternativeRouteCount = routeData['alternative_count'] ?? 1;
+
+      _calculateDistanceToNextStep();
+      _calculateEstimatedArrival();
+    } catch (e) {
+      _error = 'Failed to get alternative route: ${e.toString()}';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Get detailed navigation status information
+  Map<String, dynamic> getNavigationStatus() {
+    return {
+      'isNavigating': _isNavigating,
+      'currentStepIndex': _currentStepIndex,
+      'totalSteps': _currentRoute?.steps.length ?? 0,
+      'distanceToNextStep': _distanceToNextStep,
+      'distanceToNextStepMeters': _distanceToNextStepMeters,
+      'distanceToDestinationMeters': _distanceToDestinationMeters,
+      'routeProgress': _routeProgress,
+      'stepProgress': _stepProgress,
+      'estimatedTimeToDestination': _estimatedTimeToDestination.inSeconds,
+      'estimatedArrivalTime': _estimatedArrivalTime,
+      'isOffRoute': _isOffRoute,
+      'nextManeuver': nextManeuver,
+      'currentInstruction': currentNavigationCue,
+      'currentRouteIndex': _currentRouteIndex,
+      'alternativeRouteCount': _alternativeRouteCount,
+      'hasAlternativeRoutes': _alternativeRouteCount > 1,
+    };
+  }
+
   @override
   void dispose() {
     _locationCheckTimer?.cancel();
+    _distanceUpdateTimer?.cancel();
     super.dispose();
   }
 }

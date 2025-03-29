@@ -1,6 +1,7 @@
 // lib/services/google_maps_service.dart
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -10,6 +11,12 @@ class GoogleMapsService {
 
   // Add a cache to reduce repeated API calls
   final Map<String, dynamic> _responseCache = {};
+
+  // Store the last route response to access alternative routes
+  Map<String, dynamic>? _lastRoutesResponse;
+
+  // Maximum number of elevation points to request at once (API limit is 512)
+  static const int _maxElevationSamples = 300;
 
   GoogleMapsService({required this.apiKey});
 
@@ -252,21 +259,183 @@ class GoogleMapsService {
     return points;
   }
 
-  // Compute approximate slope factor for a route
-  Future<double> computeRouteSlope(String routePolyline) async {
-    // Simplified version that doesn't use compute, as it's not critical
-    try {
-      final points = _decodePolyline(routePolyline);
+  // Get elevation data for route points using the Google Elevation API
+  Future<List<Map<String, dynamic>>> getElevationData(List<Map<String, double>> routePoints) async {
+    // Check if we have internet connectivity
+    if (!await _checkConnectivity()) {
+      throw Exception('No internet connection. Please check your network settings and try again.');
+    }
 
-      if (points.length < 2) {
-        return 0.0; // No slope if there's only one or no point
+    // Reduce number of points for API efficiency - sample evenly along the route
+    List<Map<String, double>> sampledPoints = [];
+    if (routePoints.length > _maxElevationSamples) {
+      // Calculate sampling interval
+      int interval = (routePoints.length / _maxElevationSamples).ceil();
+
+      // Always include first and last points
+      sampledPoints.add(routePoints.first);
+
+      // Add evenly spaced points
+      for (int i = interval; i < routePoints.length - 1; i += interval) {
+        sampledPoints.add(routePoints[i]);
       }
 
-      // Simplified slope calculation
-      return 0.5; // Simulate a moderate slope
+      sampledPoints.add(routePoints.last);
+    } else {
+      sampledPoints = List.from(routePoints);
+    }
+
+    // Create location string for the API request
+    final locationString = sampledPoints.map((point) =>
+    "${point['lat']},${point['lng']}"
+    ).join('|');
+
+    // Setup API request
+    const url = "https://maps.googleapis.com/maps/api/elevation/json";
+    final params = {
+      'locations': locationString,
+      'key': apiKey
+    };
+
+    try {
+      final uri = Uri.parse(url).replace(queryParameters: params);
+      final res = await _makeApiRequest(uri, useCache: true);
+
+      if (res['status'] == "OK") {
+        // Extract elevation results
+        final results = res['results'] as List;
+        List<Map<String, dynamic>> elevationData = [];
+
+        for (int i = 0; i < results.length; i++) {
+          final result = results[i];
+          elevationData.add({
+            'lat': result['location']['lat'],
+            'lng': result['location']['lng'],
+            'elevation': result['elevation'],
+            'resolution': result['resolution'],
+            'index': i, // Keep track of position in route
+          });
+        }
+
+        return elevationData;
+      } else {
+        throw Exception("Elevation API error: ${res['status']}");
+      }
+    } catch (e) {
+      debugPrint("Error getting elevation data: $e");
+      return []; // Return empty list on error - will fall back to default slope calculation
+    }
+  }
+
+  // Calculate path slope metrics based on elevation data
+  Future<Map<String, dynamic>> computeRouteSlopeMetrics(String polyline) async {
+    try {
+      // Decode polyline to get path points
+      final points = _decodePolyline(polyline);
+
+      if (points.length < 2) {
+        return {
+          'avgSlope': 0.0,
+          'maxSlope': 0.0,
+          'totalAscent': 0.0,
+          'totalDescent': 0.0,
+          'slopeFactor': 0.0
+        };
+      }
+
+      // Get elevation data for path points
+      final elevationData = await getElevationData(points);
+
+      // If no elevation data available, return default values
+      if (elevationData.isEmpty) {
+        return {
+          'avgSlope': 0.0,
+          'maxSlope': 0.0,
+          'totalAscent': 0.0,
+          'totalDescent': 0.0,
+          'slopeFactor': 0.5 // Default moderate slope factor
+        };
+      }
+
+      // Calculate slope metrics
+      double totalAscent = 0.0;
+      double totalDescent = 0.0;
+      double maxSlope = 0.0;
+      List<double> slopes = [];
+
+      // Process elevation changes along the route
+      for (int i = 0; i < elevationData.length - 1; i++) {
+        final point1 = elevationData[i];
+        final point2 = elevationData[i + 1];
+
+        // Calculate horizontal distance between points (in meters)
+        final double lat1 = point1['lat'];
+        final double lng1 = point1['lng'];
+        final double lat2 = point2['lat'];
+        final double lng2 = point2['lng'];
+
+        // Haversine formula for distance (simplified)
+        final double R = 6371000; // Earth radius in meters
+        final double dLat = (lat2 - lat1) * (math.pi / 180);
+        final double dLng = (lng2 - lng1) * (math.pi / 180);
+        final double a =
+            math.sin(dLat / 2) * math.sin(dLat / 2) +
+                math.sin(dLng / 2) * math.sin(dLng / 2) *
+                    math.cos(lat1 * math.pi / 180) * math.cos(lat2 * math.pi / 180);
+        final double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+        final double distance = R * c;
+
+        // Calculate elevation change
+        final double elev1 = point1['elevation'];
+        final double elev2 = point2['elevation'];
+        final double elevChange = elev2 - elev1;
+
+        // Track ascents and descents
+        if (elevChange > 0) {
+          totalAscent += elevChange;
+        } else {
+          totalDescent += elevChange.abs();
+        }
+
+        // Calculate slope (as percentage)
+        final double slope = distance > 0 ? (elevChange / distance) * 100 : 0;
+        slopes.add(slope);
+
+        // Track maximum slope
+        if (slope.abs() > maxSlope) {
+          maxSlope = slope.abs();
+        }
+      }
+
+      // Calculate average slope
+      final double avgSlope = slopes.isNotEmpty ?
+      slopes.reduce((a, b) => a + b) / slopes.length : 0;
+
+      // Calculate slope factor (0-1 scale, higher means more difficult terrain)
+      // This is a weighted combination of average slope, max slope, and total ascent
+      // Adjust weights as needed for your specific use case
+      final double slopeFactor = (
+          0.3 * (avgSlope.abs() / 10) + // Normalize to 0-1 range, assuming 10% as challenging avg slope
+              0.3 * (maxSlope / 20) +        // Normalize to 0-1 range, assuming 20% as challenging max slope
+              0.4 * (totalAscent / 100)       // Normalize to 0-1 range, assuming 100m as challenging ascent
+      ).clamp(0.0, 1.0);  // Ensure result is between 0-1
+
+      return {
+        'avgSlope': avgSlope,
+        'maxSlope': maxSlope,
+        'totalAscent': totalAscent,
+        'totalDescent': totalDescent,
+        'slopeFactor': slopeFactor
+      };
     } catch (e) {
       debugPrint('Error computing route slope: $e');
-      return 0.0;
+      return {
+        'avgSlope': 0.0,
+        'maxSlope': 0.0,
+        'totalAscent': 0.0,
+        'totalDescent': 0.0,
+        'slopeFactor': 0.5 // Default moderate slope factor on error
+      };
     }
   }
 
@@ -324,7 +493,7 @@ class GoogleMapsService {
   Future<Map<String, dynamic>> getNavigationPath(
       String origin,
       String destination,
-      {String languageCode = 'en-US'}) async {
+      {String languageCode = 'en-US', int alternativeIndex = -1}) async {
     print("Getting the path from $origin to $destination with language: $languageCode");
 
     // Check network connectivity
@@ -332,6 +501,22 @@ class GoogleMapsService {
       throw Exception('No internet connection. Please check your network settings and try again.');
     }
 
+    // If alternativeIndex >= 0, we're requesting a specific alternative route
+    // and we already have the routes response cached
+    if (alternativeIndex >= 0 && _lastRoutesResponse != null) {
+      final routes = _lastRoutesResponse!.containsKey('routes')
+          ? List<dynamic>.from(_lastRoutesResponse!['routes'])
+          : <dynamic>[];
+
+      if (alternativeIndex < routes.length) {
+        // Process the selected alternative route
+        return _processSelectedRoute(routes[alternativeIndex], routes, alternativeIndex);
+      } else {
+        throw Exception("Alternative route index out of range");
+      }
+    }
+
+    // Otherwise, make a new API request
     const url = "https://maps.googleapis.com/maps/api/directions/json";
     final params = {
       'origin': origin,
@@ -346,6 +531,9 @@ class GoogleMapsService {
     try {
       final uri = Uri.parse(url).replace(queryParameters: params);
       final res = await _makeApiRequest(uri, useCache: false); // Don't cache routes
+
+      // Store the response for potential alternative route requests
+      _lastRoutesResponse = res;
 
       if (res['status'] == "OK") {
         // Process the results directly in the main isolate
@@ -371,8 +559,88 @@ class GoogleMapsService {
     }
   }
 
+  // Get an alternative route
+  Future<Map<String, dynamic>> getAlternativeRoute(
+      String origin,
+      String destination,
+      {String languageCode = 'en-US', int currentRouteIndex = 0}) async {
+
+    // Check if we have available alternative routes
+    if (_lastRoutesResponse == null) {
+      // If no previous response, get a new one
+      return await getNavigationPath(origin, destination, languageCode: languageCode);
+    }
+
+    final routes = _lastRoutesResponse!.containsKey('routes')
+        ? List<dynamic>.from(_lastRoutesResponse!['routes'])
+        : <dynamic>[];
+
+    if (routes.length <= 1) {
+      // No alternatives available
+      throw Exception("No alternative routes available");
+    }
+
+    // Find the next route index (circular)
+    int nextRouteIndex = (currentRouteIndex + 1) % routes.length;
+
+    // Process the selected alternative route
+    return _processSelectedRoute(routes[nextRouteIndex], routes, nextRouteIndex);
+  }
+
+  // Process the selected route
+  Future<Map<String, dynamic>> _processSelectedRoute(dynamic selectedRoute, List<dynamic> allRoutes, int routeIndex) async {
+    try {
+      if (!selectedRoute.containsKey('legs') || selectedRoute['legs'].isEmpty) {
+        throw Exception("Selected route has no legs");
+      }
+
+      final leg = selectedRoute['legs'][0]; // For walking, typically 1 leg
+      final steps = leg.containsKey('steps') ? List<dynamic>.from(leg['steps']) : <dynamic>[];
+
+      // Flatten sub-steps to avoid duplicate instructions
+      final flattenedSteps = flattenSteps(steps);
+
+      // Process steps into a more usable format
+      final processedSteps = <Map<String, dynamic>>[];
+      for (int i = 0; i < flattenedSteps.length; i++) {
+        processedSteps.add(processStep(flattenedSteps[i]));
+      }
+
+      // Get overview polyline for slope analysis
+      String overviewPolyline = '';
+      if (selectedRoute.containsKey('overview_polyline') &&
+          selectedRoute['overview_polyline'] is Map &&
+          selectedRoute['overview_polyline'].containsKey('points')) {
+        overviewPolyline = selectedRoute['overview_polyline']['points'] as String;
+      }
+
+      // Calculate slope metrics for the route
+      Map<String, dynamic> slopeMetrics = {'slopeFactor': 0.5};
+      if (overviewPolyline.isNotEmpty) {
+        slopeMetrics = await computeRouteSlopeMetrics(overviewPolyline);
+      }
+
+      // Add slope info to route data
+      return {
+        'route': selectedRoute,
+        'all_routes': allRoutes,
+        'route_index': routeIndex,
+        'alternative_count': allRoutes.length,
+        'steps': processedSteps,
+        'total_distance': leg['distance']['text'],
+        'total_duration': leg['duration']['text'],
+        'start_address': leg['start_address'],
+        'end_address': leg['end_address'],
+        'slope_metrics': slopeMetrics,
+      };
+    } catch (e) {
+      debugPrint('Error processing selected route: $e');
+      rethrow;
+    }
+  }
+
   // Process route result and pick the best route
-  Map<String, dynamic> _processRouteResult(Map<String, dynamic> res) {
+  Future<Map<String, dynamic>> _processRouteResult(Map<String, dynamic> res) async {
     try {
       final routes = res.containsKey('routes')
           ? List<dynamic>.from(res['routes'])
@@ -384,15 +652,27 @@ class GoogleMapsService {
         throw Exception("No routes found. Please try different locations.");
       }
 
-      // Evaluate and pick best route
-      Map<String, dynamic>? bestRoute;
-      double bestScore = double.infinity;
-
-      for (int idx = 0; idx < routes.length; idx++) {
-        final route = routes[idx];
+      // Analyze all routes for slope factors
+      List<Map<String, dynamic>> routeAnalyses = [];
+      for (int i = 0; i < routes.length; i++) {
+        final route = routes[i];
 
         if (!route.containsKey('legs') || route['legs'].isEmpty) {
           continue; // Skip if no legs
+        }
+
+        // Get overview polyline for the route
+        String polyline = '';
+        if (route.containsKey('overview_polyline') &&
+            route['overview_polyline'] is Map &&
+            route['overview_polyline'].containsKey('points')) {
+          polyline = route['overview_polyline']['points'] as String;
+        }
+
+        // Calculate slope metrics
+        Map<String, dynamic> slopeMetrics = {'slopeFactor': 0.5}; // Default
+        if (polyline.isNotEmpty) {
+          slopeMetrics = await computeRouteSlopeMetrics(polyline);
         }
 
         final leg = route['legs'][0]; // For walking, typically 1 leg
@@ -420,22 +700,45 @@ class GoogleMapsService {
           }
         }
 
-        // Use a simplified slope calculation
-        double slopeFactor = 0.0;
+        routeAnalyses.add({
+          'index': i,
+          'travelTime': travelTime,
+          'stepCount': stepCount,
+          'turnCount': turnCount,
+          'slopeMetrics': slopeMetrics,
+        });
+      }
 
-        // Simplified scoring without slope API calls
-        const timeWeight = 1.0;
-        const stepWeight = 0.5;
-        const turnWeight = 0.75;
+      // Evaluate and pick best route using all factors
+      Map<String, dynamic>? bestRoute;
+      double bestScore = double.infinity;
+      int bestRouteIndex = 0;
+
+      for (var analysis in routeAnalyses) {
+        // Scoring factors
+        final int travelTime = analysis['travelTime'];
+        final int stepCount = analysis['stepCount'];
+        final int turnCount = analysis['turnCount'];
+        final double slopeFactor = analysis['slopeMetrics']['slopeFactor'] ?? 0.5;
+
+        // Calculate weighted score - adjust weights based on priorities
+        const timeWeight = 1.0;     // Time is important
+        const stepWeight = 0.3;     // Fewer steps is somewhat better
+        const turnWeight = 0.5;     // Fewer turns is better
+        const slopeWeight = 2.0;    // Slope is very important for walking
 
         final score = (timeWeight * travelTime) +
             (stepWeight * stepCount) +
-            (turnWeight * turnCount);
+            (turnWeight * turnCount) +
+            (slopeWeight * slopeFactor * 1000); // Scale up slope factor
+
+        debugPrint('Route ${analysis['index']}: Time=$travelTime, Steps=$stepCount, Turns=$turnCount, Slope=$slopeFactor, Score=$score');
 
         // Update best route if this one is better
         if (score < bestScore) {
           bestScore = score;
-          bestRoute = route;
+          bestRouteIndex = analysis['index'];
+          bestRoute = routes[bestRouteIndex];
         }
       }
 
@@ -443,48 +746,23 @@ class GoogleMapsService {
         throw Exception("No valid routes found");
       }
 
-      // Find chosen route index
-      int chosenIndex = -1;
-      for (int i = 0; i < routes.length; i++) {
-        if (routes[i] == bestRoute) {
-          chosenIndex = i;
-          break;
-        }
-      }
-
-      // Get legs and flatten steps
-      final legs = bestRoute.containsKey('legs')
-          ? List<dynamic>.from(bestRoute['legs'])
-          : <dynamic>[];
-
-      if (legs.isEmpty) {
-        throw Exception("No legs in the chosen route.");
-      }
-
-      final steps = legs[0].containsKey('steps')
-          ? List<dynamic>.from(legs[0]['steps'])
-          : <dynamic>[];
-      final flattenedSteps = flattenSteps(steps);
-
-      // Process steps into a more usable format
-      final processedSteps = <Map<String, dynamic>>[];
-      for (int i = 0; i < flattenedSteps.length; i++) {
-        processedSteps.add(processStep(flattenedSteps[i]));
-      }
-
-      return {
-        'route': bestRoute,
-        'all_routes': routes,
-        'steps': processedSteps,
-        'total_distance': legs[0]['distance']['text'],
-        'total_duration': legs[0]['duration']['text'],
-        'start_address': legs[0]['start_address'],
-        'end_address': legs[0]['end_address'],
-      };
+      // Process the best route
+      return await _processSelectedRoute(bestRoute, routes, bestRouteIndex);
     } catch (e) {
       debugPrint('Error processing route: $e');
       rethrow;
     }
+  }
+
+  // Get the number of alternative routes available
+  int getAlternativeRouteCount() {
+    if (_lastRoutesResponse == null) return 0;
+
+    final routes = _lastRoutesResponse!.containsKey('routes')
+        ? List<dynamic>.from(_lastRoutesResponse!['routes'])
+        : <dynamic>[];
+
+    return routes.length;
   }
 }
 
