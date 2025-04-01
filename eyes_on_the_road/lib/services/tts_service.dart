@@ -1,11 +1,11 @@
-import 'package:text_to_speech/text_to_speech.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 class TtsService {
-  final TextToSpeech _tts = TextToSpeech();
+  final FlutterTts _tts = FlutterTts();
 
   TtsService() {
     _tts.setVolume(1.0); // Default: 1.0 (max volume)
-    _tts.setRate(1.0); // Default: 1.0 (normal speed)
+    _tts.setSpeechRate(1.0); // Default: 1.0 (normal speed)
     _tts.setPitch(1.0); // Default: 1.0 (normal tone)
     _tts.setLanguage('zh-HK'); // Set default language to Cantonese
   }
@@ -25,7 +25,7 @@ class TtsService {
   }
 
   void setRate(double rate) {
-    _tts.setRate(rate);
+    _tts.setSpeechRate(rate);
   }
 
   void setPitch(double pitch) {
