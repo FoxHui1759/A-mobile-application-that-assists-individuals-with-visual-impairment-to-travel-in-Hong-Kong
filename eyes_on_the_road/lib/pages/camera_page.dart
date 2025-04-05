@@ -9,7 +9,7 @@ class CameraPage extends StatefulWidget {
 }
 
 class _CameraPageState extends State<CameraPage> {
-  final SpeechService _speechService = SpeechService();
+  final STTService _speechService = STTService();
   String navigationCue = 'go forward';
   String distance = '100m';
   String destination = 'The University of Hong Kong';
@@ -19,13 +19,19 @@ class _CameraPageState extends State<CameraPage> {
   void initState() {
     super.initState();
     _speechService.initialize();
+    print("Speech service initialized");
   }
 
   void _showMicrophone() {
     setState(() {
       _inputting = true;
     });
-    _speechService.startListening();
+    _speechService.startListening((recognizedText) {
+      setState(() {
+        destination = recognizedText;
+        print("Recognized: $recognizedText");
+      });
+    });
   }
 
   void _hideMicrophone() async {

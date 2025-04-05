@@ -7,7 +7,6 @@ class TtsService {
     _tts.setVolume(1.0); // Default: 1.0 (max volume)
     _tts.setSpeechRate(1.0); // Default: 1.0 (normal speed)
     _tts.setPitch(1.0); // Default: 1.0 (normal tone)
-    _tts.setLanguage('zh-HK'); // Set default language to Cantonese
   }
 
   Future<void> speak(String text) async {

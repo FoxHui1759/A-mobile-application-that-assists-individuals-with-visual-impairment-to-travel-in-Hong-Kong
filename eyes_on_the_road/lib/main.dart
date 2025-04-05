@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'services/tts_service.dart';
 import 'home_page.dart';
 
 const String appTitle = 'Eyes on the Road';

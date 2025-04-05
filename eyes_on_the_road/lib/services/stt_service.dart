@@ -1,50 +1,49 @@
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-import 'tts_service.dart';
+import 'package:permission_handler/permission_handler.dart';
 
-class SpeechService {
+class STTService {
+  static final STTService _instance = STTService._internal();
+  factory STTService() => _instance;
+  STTService._internal();
+
   final stt.SpeechToText _speech = stt.SpeechToText();
-  final TtsService _tts = TtsService();
+  bool isInitialized = false;
 
-  String recognizedWords = '';
-  bool _isListening = false;
-  String _localeId = 'zh_HK';
+  Future<void> initialize() async {
+    final status = await Permission.microphone.request();
 
-  // Initialize with optional locale parameter
-  Future<bool> initialize({String? localeId}) async {
-    if (localeId != null) {
-      _localeId = localeId;
+    if (!status.isGranted) {
+      throw Exception("Microphone permission not granted");
     }
-    return await _speech.initialize(
-      onStatus: (status) => print('Speech Status: $status'),
-      onError: (error) => print('Speech Error: $error'),
+
+    isInitialized = await _speech.initialize(
+      onStatus: (status) => print('Speech status: $status'),
+      onError: (error) => print('Speech error: $error'),
+    );
+
+    if (!isInitialized) {
+      throw Exception("Speech recognition not available");
+    }
+  }
+
+  Future<void> startListening(Function(String recognizedText) onResultCallback) async {
+    if (!isInitialized) {
+      throw Exception("Speech recognition is not initialized");
+    }
+
+    await _speech.listen(
+      onResult: (result) {
+        if (result.recognizedWords.isNotEmpty) {
+          onResultCallback(result.recognizedWords);
+        }
+      },
+      listenMode: stt.ListenMode.confirmation,
     );
   }
 
-  void startListening() async {
-    if (!_isListening) {
-      _isListening = true;
-      await _speech.listen(
-        onResult: (result) {
-          recognizedWords = result.recognizedWords;
-        },
-        listenFor: const Duration(seconds: 60),
-        pauseFor: const Duration(seconds: 3),
-        localeId: _localeId,
-      );
-    }
+  Future<void> stopListening() async {
+    await _speech.stop();
   }
 
-  void stopListening() {
-    if (_isListening) {
-      _isListening = false;
-      _speech.stop();
-    }
-  }
-
-  void setLocale(String localeId) {
-    _localeId = localeId;
-  }
-
-  bool get isListening => _isListening;
-  String get localeId => _localeId;
+  bool get isListening => _speech.isListening;
 }
