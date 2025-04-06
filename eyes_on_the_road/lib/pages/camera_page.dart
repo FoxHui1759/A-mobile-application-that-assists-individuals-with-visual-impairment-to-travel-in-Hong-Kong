@@ -1,3 +1,4 @@
+// lib/pages/camera_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/navigation_service.dart';
