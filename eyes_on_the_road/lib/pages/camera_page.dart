@@ -110,14 +110,15 @@ class _CameraPageState extends State<CameraPage> {
     }
   }
 
-  void _toggleAutoAdvance(BuildContext context) {
-    Provider.of<NavigationService>(context, listen: false).toggleAutoAdvance();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer2<NavigationService, LocationService>(
       builder: (context, navigationService, locationService, child) {
+        // Enable auto-advance by default for navigation
+        if (navigationService.isNavigating && !navigationService.autoAdvance) {
+          navigationService.toggleAutoAdvance();
+        }
+
         return GestureDetector(
           onLongPressStart: (details) {
             _showMicrophone();
@@ -127,13 +128,18 @@ class _CameraPageState extends State<CameraPage> {
           },
           child: Stack(
             children: <Widget>[
-              // Background image
-              Image(
-                  fit: BoxFit.cover,
-                  width: View.of(context).physicalSize.width,
-                  height: View.of(context).physicalSize.height,
-                  image: const AssetImage('assets/images/street.jpg')
+              // Background image, replace with black background
+              Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                color: Colors.black,
               ),
+              // Image(
+              //     fit: BoxFit.cover,
+              //     width: View.of(context).physicalSize.width,
+              //     height: View.of(context).physicalSize.height,
+              //     image: const AssetImage('assets/images/street.jpg')
+              // ),
 
               // Navigation info
               Container(
@@ -141,46 +147,63 @@ class _CameraPageState extends State<CameraPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    // Navigation cue (top)
+                    // Destination and Navigation cue (top)
                     Container(
                       margin: const EdgeInsets.only(top: 10.0),
                       width: double.infinity,
-                      height: 100,
                       decoration: BoxDecoration(
                         color: navigationService.isOffRoute
                             ? Colors.red[800]
                             : Theme.of(context).colorScheme.secondary,
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Center(
-                        child: Text(
-                          navigationService.currentNavigationCue,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          // Destination display
+                          if (navigationService.isNavigating)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: Text(
+                                'To: ${navigationService.destination}',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white
+                                ),
+                              ),
+                            ),
+
+                          // Current navigation instruction
+                          Text(
+                            navigationService.currentNavigationCue,
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ],
                       ),
                     ),
 
-                    // Current position (only shown when navigating)
-                    if (navigationService.isNavigating && locationService.hasLocation)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                        child: Container(
-                          padding: const EdgeInsets.all(10.0),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor.withOpacity(0.8),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            'Your position: ${locationService.currentPosition!.latitude.toStringAsFixed(5)}, '
-                                '${locationService.currentPosition!.longitude.toStringAsFixed(5)}',
-                            style: const TextStyle(color: Colors.white, fontSize: 12),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
+                    // // Current position (only shown when navigating)
+                    // if (navigationService.isNavigating && locationService.hasLocation)
+                    //   Padding(
+                    //     padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    //     child: Container(
+                    //       padding: const EdgeInsets.all(10.0),
+                    //       decoration: BoxDecoration(
+                    //         color: Theme.of(context).primaryColor.withOpacity(0.8),
+                    //         borderRadius: BorderRadius.circular(10),
+                    //       ),
+                    //       child: Text(
+                    //         'Your position: ${locationService.currentPosition!.latitude.toStringAsFixed(5)}, '
+                    //             '${locationService.currentPosition!.longitude.toStringAsFixed(5)}',
+                    //         style: const TextStyle(color: Colors.white, fontSize: 12),
+                    //         textAlign: TextAlign.center,
+                    //       ),
+                    //     ),
+                    //   ),
 
-                    // Distance and navigation controls (bottom)
+                    // Distance and minimal controls (bottom)
                     Container(
                       margin: const EdgeInsets.only(bottom: 10.0),
                       width: double.infinity,
@@ -188,7 +211,7 @@ class _CameraPageState extends State<CameraPage> {
                         children: [
                           // Distance display
                           Container(
-                            height: 100,
+                            height: 80,
                             decoration: BoxDecoration(
                                 color: Theme.of(context).colorScheme.secondary,
                                 borderRadius: BorderRadius.circular(20)),
@@ -200,100 +223,24 @@ class _CameraPageState extends State<CameraPage> {
                             ),
                           ),
 
-                          // Navigation controls
+                          // Minimal navigation controls
                           if (navigationService.isNavigating)
                             Padding(
                               padding: const EdgeInsets.only(top: 10.0),
-                              child: Column(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  // Main navigation buttons
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      // Previous step
-                                      ElevatedButton(
-                                        onPressed: navigationService.previousStep,
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Theme.of(context).primaryColor,
-                                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                        ),
-                                        child: const Icon(Icons.arrow_back, color: Colors.white),
-                                      ),
-
-                                      // End navigation
-                                      ElevatedButton(
-                                        onPressed: navigationService.endNavigation,
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.red[700],
-                                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                        ),
-                                        child: const Icon(Icons.cancel, color: Colors.white),
-                                      ),
-
-                                      // Next step
-                                      ElevatedButton(
-                                        onPressed: navigationService.nextStep,
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Theme.of(context).primaryColor,
-                                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                        ),
-                                        child: const Icon(Icons.arrow_forward, color: Colors.white),
-                                      ),
-                                    ],
-                                  ),
-
-                                  // Additional navigation controls
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 10.0),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        // Auto-advance toggle
-                                        ElevatedButton.icon(
-                                          onPressed: () => _toggleAutoAdvance(context),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: navigationService.autoAdvance
-                                                ? Colors.green[700]
-                                                : Colors.grey[700],
-                                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                          ),
-                                          icon: const Icon(Icons.directions_walk, color: Colors.white, size: 18),
-                                          label: Text(
-                                            navigationService.autoAdvance ? 'Auto On' : 'Auto Off',
-                                            style: const TextStyle(color: Colors.white, fontSize: 12),
-                                          ),
-                                        ),
-
-                                        // Alternative Route button (only shown when alternatives available)
-                                        if (navigationService.hasAlternativeRoutes)
-                                          ElevatedButton.icon(
-                                            onPressed: () => _useAlternativeRoute(context),
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.blue[700],
-                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                            ),
-                                            icon: const Icon(Icons.alt_route, color: Colors.white, size: 18),
-                                            label: const Text(
-                                              'Alternative',
-                                              style: TextStyle(color: Colors.white, fontSize: 12),
-                                            ),
-                                          ),
-
-                                        // Recalculate route button (only shown when off-route)
-                                        if (navigationService.isOffRoute)
-                                          ElevatedButton.icon(
-                                            onPressed: () => _recalculateRoute(context),
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.orange[700],
-                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                            ),
-                                            icon: const Icon(Icons.refresh, color: Colors.white, size: 18),
-                                            label: const Text(
-                                              'Recalculate',
-                                              style: TextStyle(color: Colors.white, fontSize: 12),
-                                            ),
-                                          ),
-                                      ],
+                                  // End navigation
+                                  ElevatedButton.icon(
+                                    onPressed: navigationService.endNavigation,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.red[700],
+                                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                    ),
+                                    icon: const Icon(Icons.cancel, color: Colors.white),
+                                    label: const Text(
+                                      'End Navigation',
+                                      style: TextStyle(color: Colors.white),
                                     ),
                                   ),
                                 ],
