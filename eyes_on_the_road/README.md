@@ -16,7 +16,7 @@ Before you begin, ensure you have the following installed:
 
 ```bash
 git clone https://github.com/FoxHui1759/A-mobile-application-that-assists-individuals-with-visual-impairment-to-travel-in-Hong-Kong
-cd navigation-assistant
+cd A-mobile-application-that-assists-individuals-with-visual-impairment-to-travel-in-Hong-Kong/eyes-on-the-road
 ```
 
 ### 2. Install Dependencies
