@@ -1,29 +1,33 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-
-import 'pages/camera_page.dart';
-import 'pages/settings_page.dart';
+import 'views/camera_view.dart';
 
 class HomePage extends StatefulWidget {
   final String title;
 
   HomePage({required this.title});
-
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
+  List<CameraDescription>? cameras;
+  CameraDescription? firstCamera;
 
-  static final List<Widget> _widgetOptions = <Widget>[
-    CameraPage(),
-    SettingsPage(),
-  ];
+  String message = '';
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  @override
+  void initState() {
+    _initializeCamera();
+    super.initState();
+  }
+
+  void _initializeCamera() async {
+    cameras = await availableCameras();
+    if (cameras != null && cameras!.isNotEmpty) {
+      firstCamera = cameras![0];
+      setState(() {}); // Trigger a rebuild after setting the camera
+    }
   }
 
   @override
@@ -47,7 +51,7 @@ class _HomePageState extends State<HomePage> {
                   color: Theme.of(context).primaryColor,
                 ),
                 child: Text(
-                  'Eyes on the Road',
+                  message,
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
               ),
@@ -55,10 +59,10 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         body: Center(
-          child: _widgetOptions.elementAt(_selectedIndex),
-        ),
+            child: firstCamera != null
+                ? CameraView(camera: firstCamera!)
+                : const CircularProgressIndicator()),
         bottomNavigationBar: BottomAppBar(
-          height: 30,
           color: Theme.of(context).primaryColor,
           child: SizedBox(
             height: 0,
