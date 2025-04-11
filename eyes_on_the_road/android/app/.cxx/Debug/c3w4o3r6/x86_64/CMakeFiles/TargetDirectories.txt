@@ -1,2 +1,0 @@
-/home/fox/dev/fyp/eyes_on_the_road/android/app/.cxx/Debug/c3w4o3r6/x86_64/CMakeFiles/edit_cache.dir
-/home/fox/dev/fyp/eyes_on_the_road/android/app/.cxx/Debug/c3w4o3r6/x86_64/CMakeFiles/rebuild_cache.dir
