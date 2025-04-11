@@ -48,7 +48,7 @@ class _CameraViewState extends State<CameraView> {
           init: ScanController(),
           builder: (controller) {
             return controller.isCameraReady.value
-                ? _LongPressDetector()
+                ? _LongPressDetector(controller)
                 : const Center(
                     child: Text("Loading Preview..."),
                   );
@@ -56,7 +56,7 @@ class _CameraViewState extends State<CameraView> {
     );
   }
 
-  Widget _LongPressDetector() {
+  Widget _LongPressDetector(controller) {
     return GestureDetector(
         onLongPressStart: (details) {
           _showMicrophone();
@@ -65,9 +65,9 @@ class _CameraViewState extends State<CameraView> {
           _hideMicrophone();
         },
         child: Stack(children: <Widget>[
+          CameraPreview(controller.cameraController),
           if (_inputting)
             MicPopup(), // Show the microphone popup when inputting
-          Container()
         ]));
   }
 }
