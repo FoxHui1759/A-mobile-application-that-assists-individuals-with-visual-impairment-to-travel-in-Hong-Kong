@@ -1,6 +1,5 @@
-import 'package:camera/camera.dart';
+import 'package:eyes_on_the_road/views/camera_view.dart';
 import 'package:flutter/material.dart';
-import 'views/camera_view.dart';
 
 class HomePage extends StatefulWidget {
   final String title;
@@ -11,23 +10,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<CameraDescription>? cameras;
-  CameraDescription? firstCamera;
-
-  String message = '';
-
   @override
   void initState() {
-    _initializeCamera();
     super.initState();
-  }
-
-  void _initializeCamera() async {
-    cameras = await availableCameras();
-    if (cameras != null && cameras!.isNotEmpty) {
-      firstCamera = cameras![0];
-      setState(() {}); // Trigger a rebuild after setting the camera
-    }
   }
 
   @override
@@ -42,26 +27,7 @@ class _HomePageState extends State<HomePage> {
           ),
           iconTheme: IconThemeData(color: Colors.white),
         ),
-        drawer: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: <Widget>[
-              DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                ),
-                child: Text(
-                  message,
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-              ),
-            ],
-          ),
-        ),
-        body: Center(
-            child: firstCamera != null
-                ? CameraView(camera: firstCamera!)
-                : const CircularProgressIndicator()),
+        body: Center(child: CameraView()),
         bottomNavigationBar: BottomAppBar(
           color: Theme.of(context).primaryColor,
           child: SizedBox(

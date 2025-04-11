@@ -5,9 +5,7 @@ import 'package:eyes_on_the_road/controller/scan_controller.dart';
 import 'package:eyes_on_the_road/widgets/mic_popup.dart';
 
 class CameraView extends StatefulWidget {
-  const CameraView({super.key, required this.camera});
-
-  final CameraDescription camera;
+  const CameraView({super.key});
   @override
   _CameraViewState createState() => _CameraViewState();
 }
