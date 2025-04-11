@@ -3,4 +3,3 @@ backend/venv
 .vscode
 Backend/google-map-api/.env
 eyes_on_the_road/.env
-google_map_path.json
