@@ -3,8 +3,10 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  flutter_tts
+  connectivity_plus
+  geolocator_windows
   permission_handler_windows
+  flutter_tts
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST

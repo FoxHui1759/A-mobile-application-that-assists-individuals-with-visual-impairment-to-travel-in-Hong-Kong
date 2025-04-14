@@ -1,5 +1,8 @@
 backend/venv
+.idea
+.vscode
 Backend/google-map-api/.env
+eyes_on_the_road/.env
 
 # Flutter specific
 # Miscellaneous

@@ -30,15 +30,31 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        multiDexEnabled true
+    }
+
+    // Reduce memory usage during build
+    dexOptions {
+        javaMaxHeapSize "4g" // Use more memory for dexing
+        preDexLibraries true // Pre-dex libraries for faster builds
+        dexInProcess true // Run dex in-process to avoid extra memory
     }
 
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig = signingConfigs.debug
         }
     }
+}
+
+dependencies {
+    // Add multidex support
+    implementation 'androidx.multidex:multidex:2.0.1'
 }
 
 flutter {
