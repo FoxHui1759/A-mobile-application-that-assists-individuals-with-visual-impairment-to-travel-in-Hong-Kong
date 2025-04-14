@@ -1,9 +1,9 @@
 // lib/pages/home_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:camera/camera.dart';
 
 import 'camera_page.dart';
-import 'settings_page.dart';
 import 'route_test_page.dart';
 import '../services/location_service.dart';
 import '../utils/permission_handler.dart';
@@ -21,11 +21,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   int _selectedIndex = 0;
   bool _locationInitialized = false;
   bool _isRequestingPermissions = false;
-
-  static final List<Widget> _widgetOptions = <Widget>[
-    const CameraPage(),
-    const SettingsPage(),
-  ];
+  CameraDescription? _camera;
 
   @override
   void initState() {
@@ -33,10 +29,27 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     // Add lifecycle observer to detect when app is resumed
     WidgetsBinding.instance.addObserver(this);
 
+    // Initialize camera
+    _initializeCamera();
+
     // Initialize location service after build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeApp();
     });
+  }
+
+  // Initialize camera
+  Future<void> _initializeCamera() async {
+    try {
+      final cameras = await availableCameras();
+      if (cameras.isNotEmpty) {
+        setState(() {
+          _camera = cameras.first;
+        });
+      }
+    } catch (e) {
+      print('Error initializing camera: $e');
+    }
   }
 
   @override
@@ -77,7 +90,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
     try {
       // Request permissions with step-by-step flow
-      final hasPermissions = await AppPermissions.checkAndRequestPermissions(context);
+      final hasPermissions = await AppPermissions.checkAndRequestPermissions(
+          context);
 
       if (hasPermissions) {
         await _initializeLocationService();
@@ -98,7 +112,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   // Initialize location service
   Future<void> _initializeLocationService() async {
-    final locationService = Provider.of<LocationService>(context, listen: false);
+    final locationService = Provider.of<LocationService>(
+        context, listen: false);
 
     try {
       // Initialize location service
@@ -159,13 +174,23 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    // Create widget options with camera
+    final List<Widget> widgetOptions = <Widget>[
+      CameraPage(camera: _camera),
+    ];
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Theme
+            .of(context)
+            .primaryColor,
         title: Text(
           widget.title,
-          style: Theme.of(context).textTheme.headlineMedium,
+          style: Theme
+              .of(context)
+              .textTheme
+              .headlineMedium,
         ),
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
@@ -193,11 +218,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           children: <Widget>[
             DrawerHeader(
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
+                color: Theme
+                    .of(context)
+                    .primaryColor,
               ),
               child: Text(
                 'Eyes on the Road',
-                style: Theme.of(context).textTheme.headlineMedium,
+                style: Theme
+                    .of(context)
+                    .textTheme
+                    .headlineMedium,
               ),
             ),
             // Add navigation menu items
@@ -239,11 +269,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             // Permissions menu item
             ListTile(
               leading: Icon(
-                _locationInitialized ? Icons.check_circle : Icons.perm_device_information,
+                _locationInitialized ? Icons.check_circle : Icons
+                    .perm_device_information,
                 color: _locationInitialized ? Colors.green : Colors.orange,
               ),
               title: Text(
-                _locationInitialized ? 'Permissions Granted' : 'Request Permissions',
+                _locationInitialized
+                    ? 'Permissions Granted'
+                    : 'Request Permissions',
               ),
               onTap: () {
                 Navigator.pop(context);
@@ -252,7 +285,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('All required permissions are already granted'),
+                      content: Text(
+                          'All required permissions are already granted'),
                       duration: Duration(seconds: 2),
                     ),
                   );
@@ -266,7 +300,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         children: [
           // Main content
           Center(
-            child: _widgetOptions.elementAt(_selectedIndex),
+            child: widgetOptions.elementAt(_selectedIndex),
           ),
 
           // Loading indicator for permission requests
@@ -301,7 +335,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Theme
+            .of(context)
+            .primaryColor,
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.white70,
         items: const [

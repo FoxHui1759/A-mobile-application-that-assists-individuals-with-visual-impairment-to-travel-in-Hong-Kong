@@ -8,27 +8,20 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 
 class GoogleMapsService {
   final String apiKey;
-
-  // Add a cache to reduce repeated API calls
   final Map<String, dynamic> _responseCache = {};
 
   // Store the last route response to access alternative routes
   Map<String, dynamic>? _lastRoutesResponse;
-
-  // Maximum number of elevation points to request at once (API limit is 512)
   static const int _maxElevationSamples = 300;
 
   GoogleMapsService({required this.apiKey});
 
-  // Check network connectivity before making API requests
   Future<bool> _checkConnectivity() async {
     var connectivityResult = await Connectivity().checkConnectivity();
     return connectivityResult != ConnectivityResult.none;
   }
 
-  // Helper to handle network errors consistently with additional caching
   Future<Map<String, dynamic>> _makeApiRequest(Uri uri, {bool useCache = true}) async {
-    // Check the cache first if enabled
     final cacheKey = uri.toString();
     if (useCache && _responseCache.containsKey(cacheKey)) {
       return _responseCache[cacheKey];
@@ -110,7 +103,6 @@ class GoogleMapsService {
   // Search for a place using the Google Places API or Geocoding API as fallback
   Future<String> getPlaceLocation(String placeName, {bool useGeocoding = true}) async {
     try {
-      // Check if we have internet connectivity
       if (!await _checkConnectivity()) {
         throw Exception('No internet connection. Please check your network settings and try again.');
       }
@@ -170,9 +162,7 @@ class GoogleMapsService {
       if (isCoordinates(location)) {
         final coords = extractCoordinates(location)!;
 
-        // Check if we have internet connectivity
         if (!await _checkConnectivity()) {
-          // If no connectivity, just return the coordinates formatted nicely
           return "Location (${coords['lat']!.toStringAsFixed(6)}, ${coords['lng']!.toStringAsFixed(6)})";
         }
 
@@ -202,23 +192,19 @@ class GoogleMapsService {
     } catch (e) {
       debugPrint('Error in preprocessCoordinates: $e');
 
-      // If there's an error, check if it's a coordinate and return a formatted version
       if (isCoordinates(location)) {
         final coords = extractCoordinates(location)!;
         return "Location (${coords['lat']!.toStringAsFixed(6)}, ${coords['lng']!.toStringAsFixed(6)})";
       }
 
-      // Otherwise, just return the original location string
       return location;
     }
   }
 
-  // Decode a polyline - safe for compute
   Future<List<Map<String, double>>> decodePolylineAsync(String polyline) async {
     return compute(_decodePolyline, polyline);
   }
 
-  // Static method to decode polyline (for compute)
   static List<Map<String, double>> _decodePolyline(String polyline) {
     List<Map<String, double>> points = [];
     int index = 0;
@@ -261,21 +247,16 @@ class GoogleMapsService {
 
   // Get elevation data for route points using the Google Elevation API
   Future<List<Map<String, dynamic>>> getElevationData(List<Map<String, double>> routePoints) async {
-    // Check if we have internet connectivity
     if (!await _checkConnectivity()) {
       throw Exception('No internet connection. Please check your network settings and try again.');
     }
 
-    // Reduce number of points for API efficiency - sample evenly along the route
     List<Map<String, double>> sampledPoints = [];
     if (routePoints.length > _maxElevationSamples) {
       // Calculate sampling interval
       int interval = (routePoints.length / _maxElevationSamples).ceil();
-
-      // Always include first and last points
       sampledPoints.add(routePoints.first);
 
-      // Add evenly spaced points
       for (int i = interval; i < routePoints.length - 1; i += interval) {
         sampledPoints.add(routePoints[i]);
       }
@@ -285,7 +266,6 @@ class GoogleMapsService {
       sampledPoints = List.from(routePoints);
     }
 
-    // Create location string for the API request
     final locationString = sampledPoints.map((point) =>
     "${point['lat']},${point['lng']}"
     ).join('|');
@@ -327,7 +307,6 @@ class GoogleMapsService {
     }
   }
 
-  // Calculate path slope metrics based on elevation data
   Future<Map<String, dynamic>> computeRouteSlopeMetrics(String polyline) async {
     try {
       // Decode polyline to get path points
@@ -357,7 +336,6 @@ class GoogleMapsService {
         };
       }
 
-      // Calculate slope metrics
       double totalAscent = 0.0;
       double totalDescent = 0.0;
       double maxSlope = 0.0;

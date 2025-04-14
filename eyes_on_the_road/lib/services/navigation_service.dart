@@ -336,7 +336,6 @@ class NavigationService extends ChangeNotifier {
         endLng
     );
 
-    // Store raw distance in meters
     _distanceToNextStepMeters = distanceMeters;
 
     // Format distance for display

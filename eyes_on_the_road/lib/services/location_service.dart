@@ -16,10 +16,9 @@ class LocationService extends ChangeNotifier {
   // Add a flag to prevent multiple simultaneous initializations
   bool _isInitializing = false;
 
-  // Add PDR service
   final PDRService _pdrService;
 
-  // Add GPS quality metrics
+  // GPS quality metrics
   double _horizontalAccuracy = 0.0;
   final int _satelliteCount = 0;
   bool _isGpsSignalLow = false;
