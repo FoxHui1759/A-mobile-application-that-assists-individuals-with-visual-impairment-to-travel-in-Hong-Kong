@@ -43,6 +43,19 @@ class _CameraPageState extends State<CameraPage> {
     // Initialize camera if available
     if (widget.camera != null) {
       _initializeCamera();
+    } else {
+      // Create a dummy camera controller to prevent LateInitializationError
+      // This will never be used, but prevents the late variable error
+      _cameraController = CameraController(
+        CameraDescription(
+          name: 'dummy',
+          lensDirection: CameraLensDirection.back,
+          sensorOrientation: 0,
+        ),
+        ResolutionPreset.low,
+      );
+      // Initialize with a completed future if no camera is available
+      _initializeControllerFuture = Future.value();
     }
 
     // Initialize speech recognition
@@ -340,15 +353,22 @@ class _CameraPageState extends State<CameraPage> {
                   future: _initializeControllerFuture,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.done) {
-                      return SizedBox(
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height,
-                        child: CameraPreview(_cameraController),
+                      // Only try to display camera preview if camera is available
+                      return widget.camera != null
+                          ? CameraPreview(_cameraController)
+                          : Container(
+                        // Placeholder when no camera is available
+                        color: Colors.black,
+                        child: const Center(
+                          child: Text(
+                            'No camera available',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
                       );
                     } else {
                       return Container(
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height,
+                        // Loading state
                         color: Colors.black,
                         child: const Center(
                           child: CircularProgressIndicator(
