@@ -5,7 +5,7 @@ class MicPopup extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.center,
-      color: Colors.black.withOpacity(0.5),
+      color: Colors.black.withAlpha((0.5 * 255).round()),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[

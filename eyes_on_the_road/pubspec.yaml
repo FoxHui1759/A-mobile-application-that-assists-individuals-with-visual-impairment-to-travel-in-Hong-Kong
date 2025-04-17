@@ -44,6 +44,7 @@ dependencies:
     tflite_flutter_helper_plus: ^0.0.2
     get: ^4.7.2
     permission_handler: ^12.0.0+1
+    tflite_v2: ^1.0.0
 
 dev_dependencies:
     flutter_test:
