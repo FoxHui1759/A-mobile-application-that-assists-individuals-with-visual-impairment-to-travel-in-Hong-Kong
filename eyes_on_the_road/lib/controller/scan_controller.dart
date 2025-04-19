@@ -66,7 +66,7 @@ class ScanController extends GetxController {
   initObjectDectector() async {
     final modelPath = await getModelPath('assets/object_labeler.tflite');
     final options = LocalObjectDetectorOptions(
-        mode: DetectionMode.stream,
+        mode: DetectionMode.single,
         modelPath: modelPath,
         classifyObjects: true,
         multipleObjects: true);
@@ -105,7 +105,7 @@ class ScanController extends GetxController {
       for (Label label in detectedObject.labels) {
         final text = label.text;
         final confidence = label.confidence;
-        //print("Detected object: $text, confidence: $confidence");
+        print("Detected object: $text, confidence: $confidence");
       }
     }
   }

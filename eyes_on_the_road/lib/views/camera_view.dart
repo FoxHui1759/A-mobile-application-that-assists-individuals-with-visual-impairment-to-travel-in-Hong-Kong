@@ -5,7 +5,9 @@ import 'package:eyes_on_the_road/controller/scan_controller.dart';
 import 'package:eyes_on_the_road/widgets/mic_popup.dart';
 
 class CameraView extends StatefulWidget {
-  const CameraView({super.key});
+  final String title;
+
+  CameraView({required this.title});
   @override
   _CameraViewState createState() => _CameraViewState();
 }
@@ -44,16 +46,30 @@ class _CameraViewState extends State<CameraView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: GetBuilder<ScanController>(
-          init: ScanController(),
-          builder: (controller) {
-            return controller.isCameraReady.value
-                ? _LongPressDetector(controller)
-                : const Center(
-                    child: Text("Loading Preview..."),
-                  );
-          }),
-    );
+        appBar: AppBar(
+          centerTitle: true,
+          backgroundColor: Theme.of(context).primaryColor,
+          title: Text(
+            widget.title,
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
+        body: GetBuilder<ScanController>(
+            init: ScanController(),
+            builder: (controller) {
+              return controller.isCameraReady.value
+                  ? _LongPressDetector(controller)
+                  : const Center(
+                      child: Text("Loading Preview..."),
+                    );
+            }),
+        bottomNavigationBar: BottomAppBar(
+          color: Theme.of(context).primaryColor,
+          child: SizedBox(
+            height: 0,
+          ),
+        ));
   }
 
   Widget _LongPressDetector(controller) {
