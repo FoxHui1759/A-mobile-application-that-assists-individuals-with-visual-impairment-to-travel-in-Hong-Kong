@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:eyes_on_the_road/controller/scanner_controller.dart';
 import 'package:eyes_on_the_road/widgets/mic_popup.dart';
 import 'package:eyes_on_the_road/widgets/message_box.dart';
+import 'package:eyes_on_the_road/service/bounding_box_painter.dart';
 
 class ScannerView extends StatefulWidget {
   final String title;
@@ -107,6 +108,10 @@ class _CameraViewState extends State<ScannerView> {
                 MessageBox(message: distance),
               ],
             ),
+          ),
+          CustomPaint(
+            painter:
+                BoundingBoxPainter(detectedObjects: controller.detectedObjects),
           ),
           if (_inputting) MicPopup(),
         ],

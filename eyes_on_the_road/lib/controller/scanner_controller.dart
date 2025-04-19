@@ -19,6 +19,8 @@ class ScannerController extends GetxController {
   var frameCount = 0;
   var isCameraReady = false.obs;
 
+  List<DetectedObject> detectedObjects = <DetectedObject>[];
+
   @override
   void onInit() {
     super.onInit();
@@ -96,17 +98,6 @@ class ScannerController extends GetxController {
       throw Exception("inputImage is null");
     }
 
-    final List<DetectedObject> objects =
-        await objectDetector.processImage(inputImage);
-    for (DetectedObject detectedObject in objects) {
-      final rect = detectedObject.boundingBox;
-      final trackingId = detectedObject.trackingId;
-
-      for (Label label in detectedObject.labels) {
-        final text = label.text;
-        final confidence = label.confidence;
-        print("Detected object: $text, confidence: $confidence");
-      }
-    }
+    detectedObjects = await objectDetector.processImage(inputImage);
   }
 }
