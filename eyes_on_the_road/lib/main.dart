@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:eyes_on_the_road/views/camera_view.dart';
+import 'package:eyes_on_the_road/views/scanner_view.dart';
 
 const String appTitle = 'Eyes on the Road';
 
@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
               fontSize: 10, fontStyle: FontStyle.normal, color: Colors.white),
         ),
       ),
-      home: CameraView(title: appTitle),
+      home: ScannerView(title: appTitle),
     );
   }
 }

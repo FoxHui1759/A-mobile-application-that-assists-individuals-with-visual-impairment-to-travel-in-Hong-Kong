@@ -3,17 +3,18 @@ import 'package:camera/camera.dart';
 import 'package:get/get.dart';
 import 'package:eyes_on_the_road/controller/scan_controller.dart';
 import 'package:eyes_on_the_road/widgets/mic_popup.dart';
+import 'package:eyes_on_the_road/widgets/message_box.dart';
 
-class CameraView extends StatefulWidget {
+class ScannerView extends StatefulWidget {
   final String title;
 
-  CameraView({required this.title});
+  ScannerView({required this.title});
   @override
   _CameraViewState createState() => _CameraViewState();
 }
 
-class _CameraViewState extends State<CameraView> {
-  String nivagationCue = 'go forward';
+class _CameraViewState extends State<ScannerView> {
+  String navigationCue = 'go forward';
   String distance = '100m';
   String destination = 'The University of Hong Kong';
 
@@ -59,9 +60,13 @@ class _CameraViewState extends State<CameraView> {
             init: ScanController(),
             builder: (controller) {
               return controller.isCameraReady.value
-                  ? _LongPressDetector(controller)
+                  ? _longPressDetector(context, controller)
                   : const Center(
-                      child: Text("Loading Preview..."),
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                        ),
+                      ),
                     );
             }),
         bottomNavigationBar: BottomAppBar(
@@ -72,7 +77,7 @@ class _CameraViewState extends State<CameraView> {
         ));
   }
 
-  Widget _LongPressDetector(controller) {
+  Widget _longPressDetector(context, controller) {
     return GestureDetector(
         onLongPressStart: (details) {
           _showMicrophone();
@@ -80,10 +85,32 @@ class _CameraViewState extends State<CameraView> {
         onLongPressEnd: (details) {
           _hideMicrophone();
         },
-        child: Stack(children: <Widget>[
-          CameraPreview(controller.cameraController),
-          if (_inputting)
-            MicPopup(), // Show the microphone popup when inputting
-        ]));
+        child: _scannerPreview(context, controller));
+  }
+
+  Widget _scannerPreview(context, controller) {
+    return Container(
+      color: Theme.of(context).primaryColor,
+      child: Stack(
+        children: <Widget>[
+          Center(
+            child: CameraPreview(controller.cameraController),
+          ),
+          Container(
+            alignment: Alignment.center,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                MessageBox(
+                  message: navigationCue,
+                ),
+                MessageBox(message: distance),
+              ],
+            ),
+          ),
+          if (_inputting) MicPopup(),
+        ],
+      ),
+    );
   }
 }
