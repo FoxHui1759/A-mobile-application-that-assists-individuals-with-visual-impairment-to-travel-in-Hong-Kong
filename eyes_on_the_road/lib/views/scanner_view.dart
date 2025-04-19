@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:get/get.dart';
-import 'package:eyes_on_the_road/controller/scan_controller.dart';
+import 'package:eyes_on_the_road/controller/scanner_controller.dart';
 import 'package:eyes_on_the_road/widgets/mic_popup.dart';
 import 'package:eyes_on_the_road/widgets/message_box.dart';
 
@@ -56,8 +56,8 @@ class _CameraViewState extends State<ScannerView> {
           ),
           iconTheme: IconThemeData(color: Colors.white),
         ),
-        body: GetBuilder<ScanController>(
-            init: ScanController(),
+        body: GetBuilder<ScannerController>(
+            init: ScannerController(),
             builder: (controller) {
               return controller.isCameraReady.value
                   ? _longPressDetector(context, controller)

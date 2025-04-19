@@ -10,7 +10,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'package:eyes_on_the_road/service/camera_image_converter.dart';
 
-class ScanController extends GetxController {
+class ScannerController extends GetxController {
   late CameraController cameraController;
   late List<CameraDescription> cameras;
 
