@@ -153,7 +153,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     // Create widget options with camera
     final List<Widget> widgetOptions = <Widget>[
-      CameraPage(camera: _camera),
+      CameraPage(),
     ];
 
     return Scaffold(
