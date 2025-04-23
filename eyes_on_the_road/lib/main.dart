@@ -24,7 +24,8 @@ void main() async {
 
   // Initialize the required services
   final appLanguageService = AppLanguageService();
-  final googleMapsService = GoogleMapsService(apiKey: dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '');
+  final googleMapsService =
+      GoogleMapsService(apiKey: dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '');
   final locationService = LocationService();
 
   runApp(
@@ -35,9 +36,9 @@ void main() async {
         ChangeNotifierProvider.value(value: appLanguageService),
 
         // Provide the NavigationService with its dependencies
-        ChangeNotifierProvider(create: (context) =>
-            NavigationService(googleMapsService, locationService, appLanguageService)
-        ),
+        ChangeNotifierProvider(
+            create: (context) => NavigationService(
+                googleMapsService, locationService, appLanguageService)),
       ],
       child: MyApp(cameras: cameras),
     ),
@@ -61,23 +62,23 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         primaryColor: Colors.black,
         colorScheme:
-        ColorScheme.fromSwatch().copyWith(secondary: Colors.black45),
+            ColorScheme.fromSwatch().copyWith(secondary: Colors.black45),
         scaffoldBackgroundColor: Colors.white,
         textTheme: TextTheme(
           headlineMedium: GoogleFonts.carlito(
-              fontSize: 25,
+              fontSize: 30,
               fontStyle: FontStyle.normal,
               color: Colors.white,
               fontWeight: FontWeight.bold),
           bodyLarge: GoogleFonts.carlito(
               fontSize: 50,
               fontStyle: FontStyle.normal,
-              color: Colors.white,
+              color: Colors.black,
               fontWeight: FontWeight.bold),
           bodyMedium: GoogleFonts.carlito(
-              fontSize: 20, fontStyle: FontStyle.normal, color: Colors.white),
+              fontSize: 20, fontStyle: FontStyle.normal, color: Colors.black),
           labelMedium: GoogleFonts.carlito(
-              fontSize: 10, fontStyle: FontStyle.normal, color: Colors.white),
+              fontSize: 25, fontStyle: FontStyle.normal, color: Colors.black),
         ),
       ),
       home: const HomePage(title: 'Eyes on the Road'),

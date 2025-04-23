@@ -90,8 +90,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
     try {
       // Request permissions with step-by-step flow
-      final hasPermissions = await AppPermissions.checkAndRequestPermissions(
-          context);
+      final hasPermissions =
+          await AppPermissions.checkAndRequestPermissions(context);
 
       if (hasPermissions) {
         await _initializeLocationService();
@@ -112,8 +112,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   // Initialize location service
   Future<void> _initializeLocationService() async {
-    final locationService = Provider.of<LocationService>(
-        context, listen: false);
+    final locationService =
+        Provider.of<LocationService>(context, listen: false);
 
     try {
       // Initialize location service
@@ -143,9 +143,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   void _showPermissionsBanner() {
     ScaffoldMessenger.of(context).showMaterialBanner(
       MaterialBanner(
+        backgroundColor: Theme.of(context).primaryColor,
         content: const Text(
-            'Location and other permissions are required for this app to work properly.'
-        ),
+            'Location and other permissions are required for this app to work properly.'),
         leading: const Icon(Icons.error_outline, color: Colors.orange),
         actions: [
           TextButton(
@@ -166,12 +166,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     );
   }
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     // Create widget options with camera
@@ -182,15 +176,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: Theme
-            .of(context)
-            .primaryColor,
+        backgroundColor: Theme.of(context).primaryColor,
         title: Text(
           widget.title,
-          style: Theme
-              .of(context)
-              .textTheme
-              .headlineMedium,
+          style: Theme.of(context).textTheme.headlineMedium,
         ),
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
@@ -203,9 +192,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   locationService.hasLocation
                       ? Icons.location_on
                       : Icons.location_off,
-                  color: locationService.hasLocation
-                      ? Colors.green
-                      : Colors.red,
+                  color:
+                      locationService.hasLocation ? Colors.green : Colors.red,
                 ),
               );
             },
@@ -218,35 +206,21 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           children: <Widget>[
             DrawerHeader(
               decoration: BoxDecoration(
-                color: Theme
-                    .of(context)
-                    .primaryColor,
+                color: Theme.of(context).primaryColor,
               ),
               child: Text(
                 'Eyes on the Road',
-                style: Theme
-                    .of(context)
-                    .textTheme
-                    .headlineMedium,
+                style: Theme.of(context).textTheme.headlineMedium,
               ),
             ),
             // Add navigation menu items
             ListTile(
               leading: const Icon(Icons.home),
-              title: const Text('Home'),
+              title:
+                  Text('Home', style: Theme.of(context).textTheme.labelMedium),
               onTap: () {
                 setState(() {
                   _selectedIndex = 0;
-                });
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Settings'),
-              onTap: () {
-                setState(() {
-                  _selectedIndex = 1;
                 });
                 Navigator.pop(context);
               },
@@ -255,7 +229,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             // Add test page menu item
             ListTile(
               leading: const Icon(Icons.map),
-              title: const Text('Route Test'),
+              title: Text('Route Test',
+                  style: Theme.of(context).textTheme.labelMedium),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -269,14 +244,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             // Permissions menu item
             ListTile(
               leading: Icon(
-                _locationInitialized ? Icons.check_circle : Icons
-                    .perm_device_information,
+                _locationInitialized
+                    ? Icons.check_circle
+                    : Icons.perm_device_information,
                 color: _locationInitialized ? Colors.green : Colors.orange,
               ),
               title: Text(
                 _locationInitialized
                     ? 'Permissions Granted'
                     : 'Request Permissions',
+                style: Theme.of(context).textTheme.labelMedium,
               ),
               onTap: () {
                 Navigator.pop(context);
@@ -285,8 +262,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text(
-                          'All required permissions are already granted'),
+                      content:
+                          Text('All required permissions are already granted'),
                       duration: Duration(seconds: 2),
                     ),
                   );
@@ -332,24 +309,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        backgroundColor: Theme
-            .of(context)
-            .primaryColor,
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white70,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.camera_alt),
-            label: 'Navigation',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
+      bottomNavigationBar: BottomAppBar(
+        color: Theme.of(context).primaryColor,
+        child: SizedBox(
+          height: 0,
+        ),
       ),
     );
   }
