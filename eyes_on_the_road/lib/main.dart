@@ -8,6 +8,7 @@ import 'services/location_service.dart';
 import 'services/google_maps_service.dart';
 import 'services/app_language_service.dart';
 import 'pages/home_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,31 +55,30 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Eyes on the Road',
       theme: ThemeData(
-        primaryColor: Colors.indigo[900],
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.indigo,
-          secondary: Colors.indigo[700],
-        ),
-        textTheme: const TextTheme(
-          headlineMedium: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-          titleLarge: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-          bodyLarge: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-          ),
-          bodyMedium: TextStyle(
-            color: Colors.white,
-          ),
-        ),
         useMaterial3: true,
+        primaryColor: Colors.black,
+        colorScheme:
+        ColorScheme.fromSwatch().copyWith(secondary: Colors.black45),
+        scaffoldBackgroundColor: Colors.white,
+        textTheme: TextTheme(
+          headlineMedium: GoogleFonts.carlito(
+              fontSize: 25,
+              fontStyle: FontStyle.normal,
+              color: Colors.white,
+              fontWeight: FontWeight.bold),
+          bodyLarge: GoogleFonts.carlito(
+              fontSize: 50,
+              fontStyle: FontStyle.normal,
+              color: Colors.white,
+              fontWeight: FontWeight.bold),
+          bodyMedium: GoogleFonts.carlito(
+              fontSize: 20, fontStyle: FontStyle.normal, color: Colors.white),
+          labelMedium: GoogleFonts.carlito(
+              fontSize: 10, fontStyle: FontStyle.normal, color: Colors.white),
+        ),
       ),
       home: const HomePage(title: 'Eyes on the Road'),
     );
