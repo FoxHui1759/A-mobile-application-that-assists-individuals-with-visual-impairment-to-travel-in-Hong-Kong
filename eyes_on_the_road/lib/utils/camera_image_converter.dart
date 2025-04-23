@@ -22,6 +22,7 @@ class CameraImageConverter {
       var rotationCompensation =
           orientations[controller.value.deviceOrientation];
       if (rotationCompensation == null) {
+        print("Error: rotationCompensation is null");
         return null;
       }
       if (camera.lensDirection == CameraLensDirection.front) {
@@ -34,7 +35,10 @@ class CameraImageConverter {
       }
       rotation = InputImageRotationValue.fromRawValue(rotationCompensation);
     }
-    if (rotation == null) return null;
+    if (rotation == null) {
+      print("Error: rotation is null");
+      return null;
+    }
 
     // get image format
     final format = InputImageFormatValue.fromRawValue(image.format.raw);
@@ -44,10 +48,15 @@ class CameraImageConverter {
     // * bgra8888 for iOS
 
     //print(format);
-    
+
     if (format == null ||
         (Platform.isAndroid && format != InputImageFormat.nv21) ||
-        (Platform.isIOS && format != InputImageFormat.bgra8888)) return null;
+        (Platform.isIOS && format != InputImageFormat.bgra8888)) {
+      print("Format not supported");
+      print("Format: $format");
+      print("Error: format is null or not supported");
+      return null;
+    }
 
     // since format is constraint to nv21 or bgra8888, both only have one plane
     if (image.planes.length != 1) return null;

@@ -59,26 +59,27 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Eyes on the Road',
       theme: ThemeData(
-        useMaterial3: true,
-        primaryColor: Colors.black,
-        colorScheme:
-            ColorScheme.fromSwatch().copyWith(secondary: Colors.black45),
-        scaffoldBackgroundColor: Colors.white,
-        textTheme: TextTheme(
-          headlineMedium: GoogleFonts.carlito(
-              fontSize: 30,
-              fontStyle: FontStyle.normal,
-              color: Colors.white,
-              fontWeight: FontWeight.bold),
-          bodyLarge: GoogleFonts.carlito(
-              fontSize: 50,
-              fontStyle: FontStyle.normal,
-              color: Colors.black,
-              fontWeight: FontWeight.bold),
-          bodyMedium: GoogleFonts.carlito(
-              fontSize: 20, fontStyle: FontStyle.normal, color: Colors.black),
-          labelMedium: GoogleFonts.carlito(
-              fontSize: 25, fontStyle: FontStyle.normal, color: Colors.black),
+        primaryColor: Colors.indigo[900],
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.indigo,
+          secondary: Colors.indigo[300],
+        ),
+        textTheme: const TextTheme(
+          headlineMedium: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+          titleLarge: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+          bodyLarge: TextStyle(
+            color: Colors.black,
+            fontSize: 18,
+          ),
+          bodyMedium: TextStyle(
+            color: Colors.black,
+          ),
         ),
       ),
       home: const HomePage(title: 'Eyes on the Road'),

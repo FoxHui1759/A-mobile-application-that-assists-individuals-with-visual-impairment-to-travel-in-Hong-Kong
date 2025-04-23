@@ -66,7 +66,7 @@ class ScannerController extends GetxController {
   }
 
   initObjectDectector() async {
-    final modelPath = await getModelPath('assets/object_labeler.tflite');
+    final modelPath = await getModelPath('assets/models/object_labeler.tflite');
     final options = LocalObjectDetectorOptions(
         mode: DetectionMode.single,
         modelPath: modelPath,
@@ -99,5 +99,11 @@ class ScannerController extends GetxController {
     }
 
     detectedObjects = await objectDetector.processImage(inputImage);
+
+    for (final object in detectedObjects) {
+      for (final label in object.labels) {
+        print("Label: ${label.text}, Confidence: ${label.confidence}");
+      }
+    }
   }
 }
