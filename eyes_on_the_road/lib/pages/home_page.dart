@@ -29,27 +29,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     // Add lifecycle observer to detect when app is resumed
     WidgetsBinding.instance.addObserver(this);
 
-    // Initialize camera
-    _initializeCamera();
-
     // Initialize location service after build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeApp();
     });
-  }
-
-  // Initialize camera
-  Future<void> _initializeCamera() async {
-    try {
-      final cameras = await availableCameras();
-      if (cameras.isNotEmpty) {
-        setState(() {
-          _camera = cameras.first;
-        });
-      }
-    } catch (e) {
-      print('Error initializing camera: $e');
-    }
   }
 
   @override
