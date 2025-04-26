@@ -51,7 +51,7 @@ class ScannerController extends GetxController {
         cameraController.startImageStream((CameraImage image) {
           //print("frame count: $frameCount");
           frameCount++;
-          if (frameCount % 10 == 0) {
+          if (frameCount % 20 == 0) {
             runDetector(cameras[0], cameraController, image);
             frameCount = 0;
           }
@@ -68,10 +68,11 @@ class ScannerController extends GetxController {
   initObjectDectector() async {
     final modelPath = await getModelPath('assets/models/object_labeler.tflite');
     final options = LocalObjectDetectorOptions(
-        mode: DetectionMode.single,
-        modelPath: modelPath,
-        classifyObjects: true,
-        multipleObjects: true);
+      mode: DetectionMode.single,
+      modelPath: modelPath,
+      classifyObjects: true,
+      multipleObjects: false,
+    );
     objectDetector = ObjectDetector(options: options);
   }
 
@@ -97,13 +98,11 @@ class ScannerController extends GetxController {
     if (inputImage == null) {
       throw Exception("inputImage is null");
     }
-
     detectedObjects = await objectDetector.processImage(inputImage);
-
-    for (final object in detectedObjects) {
-      for (final label in object.labels) {
-        print("Label: ${label.text}, Confidence: ${label.confidence}");
+    for (final detectedObject in detectedObjects){
+      for (final label in detectedObject.labels){
+        print("label: ${label.text}");
       }
     }
+    }
   }
-}

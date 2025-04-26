@@ -10,6 +10,7 @@ import '../services/tts_service.dart';
 import '../utils/connectivity_checker.dart';
 import '../widgets/error_banner.dart';
 import '../controller/scanner_controller.dart';
+import 'dart:async';
 
 class CameraPage extends StatefulWidget {
   const CameraPage({super.key});
@@ -30,11 +31,19 @@ class _CameraPageState extends State<CameraPage> {
   final TtsService _ttsService = TtsService();
   bool _isSpeaking = false;
 
+  String _objectDetectionResult = '';
+  Timer? _timer;
+
   @override
   void initState() {
     super.initState();
     // Initialize speech recognition
     _initializeSpeechServices();
+    _timer = Timer.periodic(const Duration(seconds: 4), (t) {
+      if (_objectDetectionResult.isNotEmpty) {
+        _ttsService.speak(_objectDetectionResult);
+      }
+    });
   }
 
   Future<void> _initializeSpeechServices() async {
@@ -58,6 +67,7 @@ class _CameraPageState extends State<CameraPage> {
       _sttService.stopListening();
     }
     super.dispose();
+    _timer?.cancel();
   }
 
   void _showMicrophone() {
@@ -215,7 +225,11 @@ class _CameraPageState extends State<CameraPage> {
       await _ttsService.stop();
     }
 
-    await _ttsService.speak(instructions);
+    _isSpeaking = true;
+
+    await _ttsService.speak(instructions).then((_) {
+      _isSpeaking = false;
+    });
   }
 
   @override
@@ -247,6 +261,14 @@ class _CameraPageState extends State<CameraPage> {
                 GetBuilder<ScannerController>(
                     init: ScannerController(),
                     builder: (controller) {
+                      if (controller.isCameraReady.value) {
+                        final detectedObject = controller.detectedObjects;
+                        if (detectedObject.isNotEmpty &&
+                            detectedObject[0].labels.isNotEmpty) {
+                          _objectDetectionResult =
+                              detectedObject[0].labels[0].text;
+                        }
+                      }
                       return controller.isCameraReady.value
                           ? Center(
                               child: CameraPreview(controller.cameraController))
