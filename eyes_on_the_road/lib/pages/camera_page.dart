@@ -41,7 +41,7 @@ class _CameraPageState extends State<CameraPage> {
     _initializeSpeechServices();
     _timer = Timer.periodic(const Duration(seconds: 4), (t) {
       if (_objectDetectionResult.isNotEmpty) {
-        _ttsService.speak(_objectDetectionResult);
+        _speakNavigationInstructions(_objectDetectionResult);
       }
     });
   }
@@ -221,6 +221,10 @@ class _CameraPageState extends State<CameraPage> {
   // Method to speak out navigation instructions
   Future<void> _speakNavigationInstructions(String instructions) async {
     // Don't interrupt current speech
+    if (_inputting) {
+      return;
+    }
+
     if (_isSpeaking) {
       await _ttsService.stop();
     }
@@ -448,41 +452,52 @@ class _CameraPageState extends State<CameraPage> {
                                           MainAxisAlignment.center,
                                       children: [
                                         // Text input option
-                                        ElevatedButton.icon(
-                                          onPressed: _toggleDestinationInput,
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor:
-                                                Theme.of(context).primaryColor,
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 16, vertical: 16),
-                                          ),
-                                          icon: const Icon(Icons.keyboard,
-                                              color: Colors.white),
-                                          label: const Text(
-                                            'Type Destination',
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 16),
+                                        Flexible(
+                                          fit: FlexFit.tight,
+                                          child: ElevatedButton.icon(
+                                            onPressed: _toggleDestinationInput,
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Theme.of(context)
+                                                  .primaryColor,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 16,
+                                                      vertical: 16),
+                                            ),
+                                            icon: const Icon(Icons.keyboard,
+                                                color: Colors.white),
+                                            label: const Text(
+                                              'Type Destination',
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 16),
+                                            ),
                                           ),
                                         ),
                                         const SizedBox(width: 10),
                                         // Voice input option
-                                        ElevatedButton.icon(
-                                          onPressed: _speechEnabled
-                                              ? _showMicrophone
-                                              : null,
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.green[700],
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 16, vertical: 16),
-                                          ),
-                                          icon: const Icon(Icons.mic,
-                                              color: Colors.white),
-                                          label: const Text(
-                                            'Speak Destination',
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 16),
+                                        Flexible(
+                                          fit: FlexFit.tight,
+                                          child: ElevatedButton.icon(
+                                            onPressed: _speechEnabled
+                                                ? _showMicrophone
+                                                : null,
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  Colors.green[700],
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 16,
+                                                      vertical: 16),
+                                            ),
+                                            icon: const Icon(Icons.mic,
+                                                color: Colors.white),
+                                            label: const Text(
+                                              'Speak Destination',
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 16),
+                                            ),
                                           ),
                                         ),
                                       ],
