@@ -32,7 +32,7 @@ flutter pub get
     - Directions API
     - Maps SDK for Android/iOS
     - Places API
-3. Add the API Key at the root of `eyes_on_the_road` folder with content `GOOGLE_MAPS_API_KEY=[Your API Key]`
+3. Create a .env file and add the API Key at the root of `eyes_on_the_road` folder in format `GOOGLE_MAPS_API_KEY=[Your API Key]`
 
 
 ### 5. Required Permissions
