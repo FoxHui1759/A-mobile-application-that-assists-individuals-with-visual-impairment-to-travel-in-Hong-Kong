@@ -8,7 +8,6 @@ import 'services/location_service.dart';
 import 'services/google_maps_service.dart';
 import 'services/app_language_service.dart';
 import 'pages/home_page.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

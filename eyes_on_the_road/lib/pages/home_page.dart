@@ -1,8 +1,6 @@
 // lib/pages/home_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:camera/camera.dart';
-
 import 'camera_page.dart';
 import 'route_test_page.dart';
 import '../services/location_service.dart';
@@ -21,7 +19,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   int _selectedIndex = 0;
   bool _locationInitialized = false;
   bool _isRequestingPermissions = false;
-  CameraDescription? _camera;
 
   @override
   void initState() {
@@ -153,7 +150,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     // Create widget options with camera
     final List<Widget> widgetOptions = <Widget>[
-      CameraPage(),
+      const CameraPage(),
     ];
 
     return Scaffold(
