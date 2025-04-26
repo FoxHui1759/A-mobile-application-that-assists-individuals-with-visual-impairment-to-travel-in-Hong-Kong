@@ -1,5 +1,7 @@
 # A-mobile-application-that-assists-individuals-with-visual-impairment-to-travel-in-Hong-Kong
 
+Read another README.md in eyes_on_the_road/ for more instruction for the Flutter App.
+
 ## Overview
 **Eyes On The Road** is to work as an alternative as a guide dog for working travel guidance in Hong Kong
 
@@ -13,26 +15,6 @@
 2. install the flutter dependencies `flutter pub get`
 3. Start a new Android Device (API Level 35) which should have done in the flutter SDK install guide
 4. run the app by `flutter run` or click in the android studio
-
-### Python Server Installation
-1. ensure you have python3
-2. get virtual environment
-```
-cd backend; python3 -m venv venv
-```
-3. open a new command line tab, activate virtual environment
-```
-source venv/bin/activate # For Linux/macOS
-venv\Scripts\activate  # For Windows
-```
-4. install dependencies for Flask 
-```
-pip install -r requirements.txt
-```
-
-### Computer Vision Model Installation
-1. install YOLO by the following guide https://docs.ultralytics.com/quickstart/
-2. install Depth-Anything-V2 by the README.md on https://github.com/DepthAnything/Depth-Anything-V2
 
 ## Coding Standards
 Follow the [Flutter Style Guide](https://github.com/flutter/flutter/blob/master/docs/contributing/Style-guide-for-Flutter-repo.md)
