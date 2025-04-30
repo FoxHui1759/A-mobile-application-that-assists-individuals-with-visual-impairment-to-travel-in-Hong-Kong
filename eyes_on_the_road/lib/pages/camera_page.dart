@@ -24,6 +24,7 @@ class _CameraPageState extends State<CameraPage> {
   bool _inputting = false;
   bool _showDestinationInput = false;
   String _recognizedSpeech = '';
+  bool _speechEnabled = false;
 
   // Services
   final STTService _sttService = STTService();

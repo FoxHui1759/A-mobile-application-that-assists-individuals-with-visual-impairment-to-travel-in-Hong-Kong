@@ -112,6 +112,8 @@ class ScannerController extends GetxController {
       throw Exception("inputImage is null");
     }
     detectedObjects = await objectDetector.processImage(inputImage);
+    print("New Detecttion");
+
     for (final detectedObject in detectedObjects) {
       print("Detected object: ${detectedObject.trackingId}");
       print("Bounding box: ${detectedObject.boundingBox}");
