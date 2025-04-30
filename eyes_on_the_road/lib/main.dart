@@ -1,8 +1,8 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
-import 'package:camera/camera.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/services.dart';
 import 'services/navigation_service.dart';
 import 'services/location_service.dart';
 import 'services/google_maps_service.dart';
@@ -13,14 +13,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await dotenv.load(fileName: ".env");
-
-  List<CameraDescription> cameras = [];
-  try {
-    cameras = await availableCameras();
-  } catch (e) {
-    print('Error getting cameras: $e');
-  }
-
   // Initialize the required services
   final appLanguageService = AppLanguageService();
   final googleMapsService =
@@ -39,21 +31,22 @@ void main() async {
             create: (context) => NavigationService(
                 googleMapsService, locationService, appLanguageService)),
       ],
-      child: MyApp(cameras: cameras),
+      child: MyApp(),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  final List<CameraDescription> cameras;
-
   const MyApp({
     super.key,
-    required this.cameras,
   });
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Eyes on the Road',
