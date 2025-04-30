@@ -24,7 +24,6 @@ class _CameraPageState extends State<CameraPage> {
   bool _inputting = false;
   bool _showDestinationInput = false;
   String _recognizedSpeech = '';
-  bool _speechEnabled = false;
 
   // Services
   final STTService _sttService = STTService();
@@ -443,66 +442,6 @@ class _CameraPageState extends State<CameraPage> {
                                         ),
                                       ),
                                     ),
-
-                                  // Set destination buttons - now has two options
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 10.0),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        // Text input option
-                                        Flexible(
-                                          fit: FlexFit.tight,
-                                          child: ElevatedButton.icon(
-                                            onPressed: _toggleDestinationInput,
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Theme.of(context)
-                                                  .primaryColor,
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 16,
-                                                      vertical: 16),
-                                            ),
-                                            icon: const Icon(Icons.keyboard,
-                                                color: Colors.white),
-                                            label: const Text(
-                                              'Type Destination',
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 16),
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        // Voice input option
-                                        Flexible(
-                                          fit: FlexFit.tight,
-                                          child: ElevatedButton.icon(
-                                            onPressed: _speechEnabled
-                                                ? _showMicrophone
-                                                : null,
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor:
-                                                  Colors.green[700],
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 16,
-                                                      vertical: 16),
-                                            ),
-                                            icon: const Icon(Icons.mic,
-                                                color: Colors.white),
-                                            label: const Text(
-                                              'Speak Destination',
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 16),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
 
                                   // Initialize location button (if not initialized)
                                   if (!locationService.isInitialized)
