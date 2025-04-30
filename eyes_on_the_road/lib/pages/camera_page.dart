@@ -40,7 +40,7 @@ class _CameraPageState extends State<CameraPage> {
     // Initialize speech recognition
     _initializeSpeechServices();
     _timer = Timer.periodic(const Duration(seconds: 5), (t) {
-      if (_objectDetectionResult.isNotEmpty) {
+      if (_objectDetectionResult.isNotEmpty && !_inputting) {
         _speakNavigationInstructions(_objectDetectionResult);
       }
     });
@@ -228,12 +228,9 @@ class _CameraPageState extends State<CameraPage> {
     if (_isSpeaking) {
       await _ttsService.stop();
     }
-
     _isSpeaking = true;
-
-    await _ttsService.speak(instructions).then((_) {
-      _isSpeaking = false;
-    });
+    await _ttsService.speak(instructions);
+    _isSpeaking = false;
   }
 
   @override
