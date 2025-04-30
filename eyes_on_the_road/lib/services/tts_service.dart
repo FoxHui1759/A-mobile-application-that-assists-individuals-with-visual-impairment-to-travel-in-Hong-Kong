@@ -5,8 +5,8 @@ class TtsService {
   final FlutterTts _tts = FlutterTts();
 
   TtsService() {
-    _tts.setVolume(1.0); // Default: 1.0 (max volume)
-    _tts.setSpeechRate(1.0); // Default: 1.0 (normal speed)
+    _tts.setVolume(2.0); // Default: 1.0 (max volume)
+    _tts.setSpeechRate(0.5); // Default: 1.0 (normal speed)
     _tts.setPitch(1.0); // Default: 1.0 (normal tone)
   }
 
@@ -35,5 +35,4 @@ class TtsService {
   void setLanguage(String language) async {
     await _tts.setLanguage(language);
   }
-
 }

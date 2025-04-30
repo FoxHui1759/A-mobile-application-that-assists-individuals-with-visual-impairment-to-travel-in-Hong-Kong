@@ -11,6 +11,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:eyes_on_the_road/utils/camera_image_converter.dart';
 
 class ScannerController extends GetxController {
+  String message = "";
+
   late CameraController cameraController;
   late List<CameraDescription> cameras;
 
@@ -48,14 +50,13 @@ class ScannerController extends GetxController {
             : ImageFormatGroup.bgra8888,
       );
       await cameraController.initialize().then((value) {
-        cameraController.startImageStream((CameraImage image) {
-          //print("frame count: $frameCount");
+        cameraController.startImageStream((CameraImage image) async {
           frameCount++;
           if (frameCount % 60 == 0) {
-            runDetector(cameras[0], cameraController, image);
             frameCount = 0;
+            await runDetector(cameras[0], cameraController, image);
+            update();
           }
-          update();
         });
       });
       isCameraReady(true);
@@ -72,6 +73,7 @@ class ScannerController extends GetxController {
       modelPath: modelPath,
       classifyObjects: true,
       multipleObjects: true,
+      maximumLabelsPerObject: 1,
     );
     objectDetector = ObjectDetector(options: options);
   }
@@ -101,6 +103,17 @@ class ScannerController extends GetxController {
     }
   }
 
+  // Helper function to determine the message based on detected objects
+  determineMessage(
+      List<String> positions, List<String> labels, List<double> areas) {
+    String s = "";
+    for (int i = 0; i < positions.length; i++) {
+      s += "${positions[i]} ${labels[i]} ";
+    }
+    message = s;
+    print("Message: $message");
+  }
+
   runDetector(CameraDescription camera, CameraController controller,
       CameraImage image) async {
     final inputImage = CameraImageConverter.inputImageFromCameraImage(
@@ -114,26 +127,44 @@ class ScannerController extends GetxController {
     detectedObjects = await objectDetector.processImage(inputImage);
     print("New Detecttion");
 
+    List<String> positions = [];
+    List<String> labels = [];
+    List<double> areas = [];
+
     for (final detectedObject in detectedObjects) {
-      print("Detected object: ${detectedObject.trackingId}");
       print("Bounding box: ${detectedObject.boundingBox}");
 
       final boundingBox = detectedObject.boundingBox;
       final imageWidth = inputImage.metadata!.size.width;
+
+      // Calculate the object area
+      final objectArea = boundingBox.width * boundingBox.height;
+      areas.add(objectArea);
+      //print("Object area: $objectArea");
 
       // Calculate the object position
       if (imageWidth > 0) {
         final objectCenterX = boundingBox.left + (boundingBox.width / 2);
         final position = calculateObjectPosition(objectCenterX, imageWidth);
 
-        print("Object position: $position");
+        positions.add(position);
+        //print("Object position: $position");
       } else {
-        print("Unable to determine object position");
+        //print("Unable to determine object position");
       }
 
-      for (final label in detectedObject.labels) {
-        print("label: ${label.text}");
+      // Get the label of the detected object
+      if (detectedObject.labels.isNotEmpty) {
+        final label = detectedObject.labels[0].text;
+        labels.add(label);
+        //print("Detected label: $label");
+      } else {
+        labels.add("Object");
+        //print("No labels detected");
       }
     }
+
+    // determine the message based on the detected objects
+    determineMessage(positions, labels, areas);
   }
 }

@@ -39,7 +39,7 @@ class _CameraPageState extends State<CameraPage> {
     super.initState();
     // Initialize speech recognition
     _initializeSpeechServices();
-    _timer = Timer.periodic(const Duration(seconds: 4), (t) {
+    _timer = Timer.periodic(const Duration(seconds: 5), (t) {
       if (_objectDetectionResult.isNotEmpty) {
         _speakNavigationInstructions(_objectDetectionResult);
       }
@@ -265,13 +265,9 @@ class _CameraPageState extends State<CameraPage> {
                 GetBuilder<ScannerController>(
                     init: ScannerController(),
                     builder: (controller) {
+                      // get the object detection result every update
                       if (controller.isCameraReady.value) {
-                        final detectedObject = controller.detectedObjects;
-                        if (detectedObject.isNotEmpty &&
-                            detectedObject[0].labels.isNotEmpty) {
-                          _objectDetectionResult =
-                              detectedObject[0].labels[0].text;
-                        }
+                        _objectDetectionResult = controller.message;
                       }
                       return controller.isCameraReady.value
                           ? Center(
