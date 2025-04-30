@@ -1,6 +1,7 @@
 // lib/pages/home_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../services/google_maps_service.dart';
 import 'camera_page.dart';
 import 'route_test_page.dart';
 import '../services/location_service.dart';
@@ -212,11 +213,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               title: Text('Route Test',
                   style: Theme.of(context).textTheme.labelMedium),
               onTap: () {
+                // Get GoogleMapsService from the provider tree
+                final googleMapsService = Provider.of<GoogleMapsService>(context, listen: false);
+
                 Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const RouteTestPage(),
+                    builder: (context) => RouteTestPage(
+                      googleMapsService: googleMapsService,
+                    ),
                   ),
                 );
               },

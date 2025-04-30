@@ -7,7 +7,13 @@ import '../services/location_service.dart';
 import '../models/route_model.dart';
 
 class RouteTestPage extends StatefulWidget {
-  const RouteTestPage({super.key});
+  // Add GoogleMapsService as a required parameter
+  final GoogleMapsService googleMapsService;
+
+  const RouteTestPage({
+    super.key,
+    required this.googleMapsService
+  });
 
   @override
   _RouteTestPageState createState() => _RouteTestPageState();
@@ -44,8 +50,8 @@ class _RouteTestPageState extends State<RouteTestPage> {
     });
 
     try {
-      // Get services
-      final googleMapsService = Provider.of<GoogleMapsService>(context, listen: false);
+      // Use widget.googleMapsService instead of Provider.of
+      final googleMapsService = widget.googleMapsService;
       final locationService = Provider.of<LocationService>(context, listen: false);
 
       // Determine starting point
