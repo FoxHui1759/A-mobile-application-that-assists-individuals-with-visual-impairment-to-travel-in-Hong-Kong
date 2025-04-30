@@ -51,7 +51,7 @@ class ScannerController extends GetxController {
         cameraController.startImageStream((CameraImage image) {
           //print("frame count: $frameCount");
           frameCount++;
-          if (frameCount % 20 == 0) {
+          if (frameCount % 60 == 0) {
             runDetector(cameras[0], cameraController, image);
             frameCount = 0;
           }
@@ -71,7 +71,7 @@ class ScannerController extends GetxController {
       mode: DetectionMode.single,
       modelPath: modelPath,
       classifyObjects: true,
-      multipleObjects: false,
+      multipleObjects: true,
     );
     objectDetector = ObjectDetector(options: options);
   }
@@ -88,6 +88,19 @@ class ScannerController extends GetxController {
     return file.path;
   }
 
+  // Helper function to calculate object position
+  String calculateObjectPosition(double objectCenterX, double imageWidth) {
+    final thirdOfWidth = imageWidth / 3;
+
+    if (objectCenterX < thirdOfWidth) {
+      return "Left";
+    } else if (objectCenterX > 2 * thirdOfWidth) {
+      return "Right";
+    } else {
+      return "Middle";
+    }
+  }
+
   runDetector(CameraDescription camera, CameraController controller,
       CameraImage image) async {
     final inputImage = CameraImageConverter.inputImageFromCameraImage(
@@ -99,10 +112,26 @@ class ScannerController extends GetxController {
       throw Exception("inputImage is null");
     }
     detectedObjects = await objectDetector.processImage(inputImage);
-    for (final detectedObject in detectedObjects){
-      for (final label in detectedObject.labels){
+    for (final detectedObject in detectedObjects) {
+      print("Detected object: ${detectedObject.trackingId}");
+      print("Bounding box: ${detectedObject.boundingBox}");
+
+      final boundingBox = detectedObject.boundingBox;
+      final imageWidth = inputImage.metadata!.size.width;
+
+      // Calculate the object position
+      if (imageWidth > 0) {
+        final objectCenterX = boundingBox.left + (boundingBox.width / 2);
+        final position = calculateObjectPosition(objectCenterX, imageWidth);
+
+        print("Object position: $position");
+      } else {
+        print("Unable to determine object position");
+      }
+
+      for (final label in detectedObject.labels) {
         print("label: ${label.text}");
       }
     }
-    }
   }
+}
