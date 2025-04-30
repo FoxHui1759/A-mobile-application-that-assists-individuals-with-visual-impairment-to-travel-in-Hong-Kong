@@ -113,53 +113,48 @@ class LocationService extends ChangeNotifier {
 
   // Initialize location service - optimized version
   Future<void> initialize() async {
-    // Prevent multiple simultaneous initializations
     if (_isInitializing) return;
     _isInitializing = true;
 
     try {
-      // Check if location service is enabled
+      // Only check if service is enabled, don't request permissions yet
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        _errorMessage = 'Location services are disabled. Please enable location services.';
+        _errorMessage = 'Location services are disabled.';
         notifyListeners();
         _isInitializing = false;
         return;
       }
 
-      // Check location permission
+      // Just check permission status without requesting
       LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          _errorMessage = 'Location permissions are denied. Please grant location permissions.';
-          notifyListeners();
-          _isInitializing = false;
-          return;
-        }
-      }
+      _isInitialized = permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always;
 
-      if (permission == LocationPermission.deniedForever) {
-        _errorMessage = 'Location permissions are permanently denied. Please enable in settings.';
-        notifyListeners();
-        _isInitializing = false;
-        return;
-      }
-
-      // Get current position
-      await _getCurrentPositionOptimized();
-
-      // Initialize PDR system
-      await _pdrService.initialize();
-
-      _isInitialized = true;
-      _isInitializing = false;
       notifyListeners();
     } catch (e) {
-      _errorMessage = 'Error initializing location service: $e';
-      debugPrint(_errorMessage);
+      _errorMessage = 'Error checking location status: $e';
+      if (kDebugMode) {
+        print(_errorMessage);
+      }
+    } finally {
       _isInitializing = false;
+    }
+  }
+
+
+  // Request location permissions
+  Future<bool> requestPermissions() async {
+    try {
+      LocationPermission permission = await Geolocator.requestPermission();
+      _isInitialized = permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always;
       notifyListeners();
+      return _isInitialized;
+    } catch (e) {
+      _errorMessage = 'Error requesting location permission: $e';
+      print(_errorMessage);
+      return false;
     }
   }
 
