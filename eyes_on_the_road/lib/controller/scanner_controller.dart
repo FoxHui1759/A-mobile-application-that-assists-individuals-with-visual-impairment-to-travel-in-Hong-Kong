@@ -23,8 +23,6 @@ class ScannerController extends GetxController {
   var isInitializing = false.obs;
   var errorMessage = ''.obs;
 
-  List<DetectedObject> detectedObjects = <DetectedObject>[];
-
   @override
   Future<void> onInit() async {
     super.onInit();
@@ -182,6 +180,18 @@ class ScannerController extends GetxController {
         image,
       );
 
+      if (inputImage == null) {
+        print("Failed to convert camera image");
+        return;
+      }
+
+      if (objectDetector == null) {
+        print("Object detector not initialized");
+        return;
+      }
+
+      final detectedObjects = await objectDetector!.processImage(inputImage);
+
       List<String> positions = [];
       List<String> labels = [];
       List<double> areas = [];
@@ -190,7 +200,7 @@ class ScannerController extends GetxController {
         print("Bounding box: ${detectedObject.boundingBox}");
 
         final boundingBox = detectedObject.boundingBox;
-        final imageWidth = inputImage!.metadata!.size.width;
+        final imageWidth = inputImage.metadata!.size.width;
 
         // Calculate the object area
         final objectArea = boundingBox.width * boundingBox.height;
@@ -204,43 +214,16 @@ class ScannerController extends GetxController {
 
           positions.add(position);
           //print("Object position: $position");
-        } else {
-          //print("Unable to determine object position");
-        }
 
-        // Get the label of the detected object
-        if (detectedObject.labels.isNotEmpty) {
-          final label = detectedObject.labels[0].text;
-          labels.add(label);
-          //print("Detected label: $label");
-        } else {
-          labels.add("Object");
-          //print("No labels detected");
-
-          detectedObjects = await objectDetector!.processImage(inputImage);
-
-          for (final detectedObject in detectedObjects) {
-            print("Detected object: ${detectedObject.trackingId}");
-            print("Bounding box: ${detectedObject.boundingBox}");
-
-            final boundingBox = detectedObject.boundingBox;
-            final imageWidth = inputImage.metadata!.size.width;
-
-            // Calculate the object position
-            if (imageWidth > 0) {
-              final objectCenterX = boundingBox.left + (boundingBox.width / 2);
-              final position =
-                  calculateObjectPosition(objectCenterX, imageWidth);
-
-              print("Object position: $position");
-            } else {
-              print("Unable to determine object position");
-            }
-
-            for (final label in detectedObject.labels) {
-              print("label: ${label.text}");
-            }
+          // Get the label of the detected object
+          if (detectedObject.labels.isNotEmpty) {
+            final label = detectedObject.labels[0].text;
+            labels.add(label);
+            //print("Detected label: $label");
+          } else {
+            labels.add("Object");
           }
+          //print("No labels detected");
         }
       }
 
